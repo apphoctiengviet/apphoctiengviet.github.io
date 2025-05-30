@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vietnamese Learning Adventures - Stories Page</title>
+    <title>Vietnamese Learning Adventures - Bottom Nav Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -19,7 +19,7 @@
             display: flex; 
             flex-direction: column;
             height: 100vh;
-            background-color: #f9fafb; /* Tailwind gray-50 for overall page background */
+            background-color: #f9fafb; 
         }
         html, body {
             margin: 0;
@@ -41,7 +41,10 @@
             height: 100%;
             display: none; 
             flex-direction: column; 
-            background-color: #f9fafb; /* Default page background */
+            background-color: #f9fafb; 
+            overflow-y: auto;
+            padding-bottom: 76px; /* 60px for nav + 16px for breathing room */
+            box-sizing: border-box; /* Ensure padding is included in height calculation */
         }
         .page.active-page {
             display: flex; 
@@ -49,25 +52,27 @@
         
         #map-page-content {
             overflow: hidden;
+            padding-bottom: 0; /* Map page doesn't need this padding, its content is fixed height */
         }
       
         /* Stories Page Specific Styles */
         #stories-page-content {
-            overflow-y: auto; /* Allow scrolling for stories list */
+            /* overflow-y: auto; already on .page */
         }
 
         .stories-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 columns */
-            gap: 1rem; /* gap-4 */
-            padding: 1rem; /* p-4 */
+            grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            gap: 1rem; 
+            padding: 1rem; 
+            /* padding-bottom: 2rem; Removed as .page now has bottom padding */
         }
         .story-card {
             position: relative;
-            border-radius: 0.75rem; /* rounded-xl */
+            border-radius: 0.75rem; 
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* shadow-lg */
-            aspect-ratio: 3 / 4; /* Maintain aspect ratio for cards */
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); 
+            aspect-ratio: 3 / 4; 
             cursor: pointer;
         }
         .story-card-image {
@@ -82,68 +87,49 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: auto; /* Adjust to content */
-            min-height: 40%; /* Ensure enough space for text and progress bar */
+            height: auto; 
+            min-height: 40%; 
             background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0) 100%);
             z-index: 2;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 0.75rem; /* p-3 */
+            padding: 0.75rem; 
         }
          .story-card .card-title {
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 700; /* font-bold */
+            font-size: 1.25rem; 
+            font-weight: 700; 
             color: white;
-            margin-bottom: 0.125rem; /* mb-0.5 */
+            margin-bottom: 0.125rem; 
         }
         .story-card .card-subtitle {
-            font-size: 0.75rem; /* text-xs */
-            color: #E5E7EB; /* gray-200 */
-            margin-bottom: 0.25rem; /* mb-1 */
+            font-size: 0.75rem; 
+            color: #E5E7EB; 
+            margin-bottom: 0.25rem; 
         }
-        .story-card .card-episodes-text { /* New class for "X episodes" text */
-            font-size: 0.75rem; /* text-xs */
-            color: #D1D5DB; /* gray-300 */
-            margin-bottom: 0.5rem; /* mb-2, space before progress bar */
+        .story-card .card-episodes-text { 
+            font-size: 0.75rem; 
+            color: #D1D5DB; 
+            margin-bottom: 0.5rem; 
         }
         .progress-bar-container {
             width: 100%;
-            height: 6px; /* Increased height for better visibility */
-            background-color: rgba(255, 255, 255, 0.3); /* Lighter background for progress bar */
-            border-radius: 3px; /* rounded-full */
+            height: 6px; 
+            background-color: rgba(255, 255, 255, 0.3); 
+            border-radius: 3px; 
             overflow: hidden;
         }
         .progress-bar-fill {
             height: 100%;
-            background-color: #FACC15; /* Gold color for progress, can be dynamic */
-            border-radius: 3px; /* rounded-full */
+            background-color: #FACC15; 
+            border-radius: 3px;
             transition: width 0.5s ease-in-out;
         }
 
-        .load-more-container {
-            padding: 1rem 1rem 2rem; /* p-4 pb-8 */
-            text-align: center;
-        }
-        .load-more-button {
-            background-color: #3B82F6; /* Tailwind blue-500 */
-            color: white;
-            font-weight: 500; /* medium */
-            padding: 0.75rem 2rem; /* py-3 px-8 */
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            transition: background-color 0.2s ease-in-out;
-        }
-        .load-more-button:hover {
-            background-color: #2563EB; /* Tailwind blue-600 */
-        }
-
-
         #lessons-page-content .content-padding,
         #profile-page-content .content-padding {
-             padding: 2rem; /* p-8 */
+             padding: 2rem; /* This is inner padding, page itself will have bottom padding */
         }
-
 
         #map-container {
             width: 100%;
@@ -171,36 +157,18 @@
             transition: transform 0.3s ease-in-out, height 0.3s ease-in-out;
             z-index: 1000;
         }
-        #info-panel.expanded {
-            transform: translateY(0);
-            height: 60vh;
-        }
-        #info-panel.collapsed {
-            transform: translateY(0);
-            height: 80px; 
-        }
-        #info-panel.hidden-fully { 
-             transform: translateY(100%);
-        }
-
+        #info-panel.expanded { transform: translateY(0); height: 60vh; }
+        #info-panel.collapsed { transform: translateY(0); height: 80px; }
+        #info-panel.hidden-fully { transform: translateY(100%); }
         #info-panel.collapsed #info-content-wrapper,
-        #info-panel.collapsed #info-panel-navigation { 
-            display: none;
-        }
-        #info-panel.collapsed #info-panel-header {
-            border-bottom: none;
-        }
+        #info-panel.collapsed #info-panel-navigation { display: none; }
+        #info-panel.collapsed #info-panel-header { border-bottom: none; }
 
         .custom-marker-icon { 
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            font-weight: bold;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            color: white; border-radius: 50%; text-align: center; font-weight: bold;
+            border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: width 0.15s ease-in-out, height 0.15s ease-in-out, line-height 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
-
         .custom-marker-icon.status-locked-upcoming { background-color: #3B82F6; }
         .custom-marker-icon.status-current { background-color: #10B981; animation: pulse-current 2s infinite; }
         .custom-marker-icon.status-completed-base { background-color: #047857; }
@@ -297,10 +265,7 @@
         <div id="stories-page-content" class="page active-page">
             <div class="stories-grid" id="stories-grid-container">
                 </div>
-            <div class="load-more-container">
-                <button class="load-more-button">Load More</button>
             </div>
-        </div>
 
         <div id="map-page-content" class="page">
             <div id="map-container">
@@ -365,37 +330,65 @@
 
 
     <script>
-        const learningScenarios = [ // Map page data
-            { id: 1, coords: [23.0663, 105.2832], scenarioTitle: "Renting a Motorbike in Ha Giang", learningFocus: "Renting vehicles, road conditions.", keyPhrases: ["Tôi muốn thuê xe máy.", "Giá bao nhiêu một ngày?", "Đường có dễ đi không?"], dialoguePrompt: "Rent a motorbike in Ha Giang.", imageUrl: "https://placehold.co/600x400/ABDEE6/FFF?text=Ha+Giang", status: 'completed', performance: 'gold' },
-            { id: 2, coords: [22.3369, 103.8439], scenarioTitle: "Trekking in Sapa", learningFocus: "Trekking plans, local customs.", keyPhrases: ["Đi bộ đường dài.", "Thời tiết ngày mai thế nào?", "Bản làng người H'Mông."], dialoguePrompt: "Arrange a trek in Sapa.", imageUrl: "https://placehold.co/600x400/CBAACB/FFF?text=Sapa", status: 'completed', performance: 'silver' },
-            { id: 3, coords: [20.6185, 105.3800], scenarioTitle: "Homestay in Mai Chau", learningFocus: "Homestay interactions, local life.", keyPhrases: ["Nhà sàn đẹp quá!", "Món này là gì?", "Cảm ơn gia đình."], dialoguePrompt: "Interact with hosts in Mai Chau.", imageUrl: "https://placehold.co/600x400/FFFFB5/000?text=Mai+Chau", status: 'completed', performance: 'bronze' },
-            { id: 4, coords: [21.0285, 105.8542], scenarioTitle: "Greetings by Hoan Kiem Lake", learningFocus: "Basic greetings and introductions.", keyPhrases: ["Chào bạn!", "Bạn có khỏe không?", "Tôi tên là..."], dialoguePrompt: "Greet a new friend in Hanoi.", imageUrl: "https://placehold.co/600x400/A9A9A9/FFF?text=Hanoi", status: 'completed', performance: 'gold' },
-            { id: 5, coords: [20.9101, 107.1839], scenarioTitle: "Boat Tour in Ha Long Bay", learningFocus: "Boat trips, admiring scenery.", keyPhrases: ["Vịnh Hạ Long thật tuyệt vời!", "Hang động này tên là gì?", "Thuyền quay lại khi nào?"], dialoguePrompt: "Ask about islands in Ha Long Bay.", imageUrl: "https://placehold.co/600x400/FFCCB6/FFF?text=Ha+Long", status: 'current', performance: null }, 
-            { id: 6, coords: [20.2518, 105.9707], scenarioTitle: "Boating in Trang An", learningFocus: "Describing landscapes, boat interactions.", keyPhrases: ["Phong cảnh đẹp quá!", "Chèo thuyền cẩn thận nhé.", "Có nhiều hang động."], dialoguePrompt: "Admire scenery in Trang An.", imageUrl: "https://placehold.co/600x400/F3B0C3/FFF?text=Ninh+Binh", status: 'locked', performance: null },
-            { id: 7, coords: [17.4784, 106.6009], scenarioTitle: "Exploring Phong Nha Caves", learningFocus: "Cave tours, safety instructions.", keyPhrases: ["Tôi muốn xem hang động.", "Tour này có mạo hiểm không?", "Phải đội mũ bảo hiểm."], dialoguePrompt: "Inquire about a cave tour.", imageUrl: "https://placehold.co/600x400/C4DEF6/FFF?text=Phong+Nha", status: 'locked', performance: null },
-            { id: 8, coords: [16.4637, 107.5909], scenarioTitle: "Visiting Hue Imperial City", learningFocus: "Historical sites, significance.", keyPhrases: ["Đây là Đại Nội Huế.", "Vua nào xây dựng nơi này?", "Tìm hiểu về lịch sử."], dialoguePrompt: "Ask about Hue's history.", imageUrl: "https://placehold.co/600x400/D4F0F0/000?text=Hue", status: 'locked', performance: null },
-            { id: 9, coords: [16.0479, 108.2208], scenarioTitle: "Directions at Dragon Bridge", learningFocus: "Asking and understanding directions.", keyPhrases: ["Xin lỗi, cho tôi hỏi...", "... ở đâu?", "Đi thẳng.", "Rẽ trái/phải."], dialoguePrompt: "Ask for directions in Da Nang.", imageUrl: "https://placehold.co/600x400/D3D3D3/FFF?text=Da+Nang", status: 'locked', performance: null },
-            { id: 10, coords: [15.7731, 108.2905], scenarioTitle: "My Son Sanctuary", learningFocus: "Ancient history, temple architecture.", keyPhrases: ["Đây là thánh địa Mỹ Sơn.", "Đền này rất cổ.", "Người Chăm xây dựng."], dialoguePrompt: "Ask about My Son temples.", imageUrl: "https://placehold.co/600x400/EFCFE3/FFF?text=My+Son", status: 'locked', performance: null },
-            { id: 11, coords: [15.8801, 108.3380], scenarioTitle: "Shopping in Hoi An", learningFocus: "Shopping, prices, bargaining.", keyPhrases: ["Cái này bao nhiêu tiền?", "Đắt quá!", "Có bớt không?"], dialoguePrompt: "Buy a lantern in Hoi An.", imageUrl: "https://placehold.co/600x400/C0C0C0/FFF?text=Hoi+An", status: 'locked', performance: null },
-            { id: 12, coords: [13.7691, 109.2281], scenarioTitle: "Relaxing in Quy Nhon", learningFocus: "Beach conversations, ordering seafood.", keyPhrases: ["Biển ở đây yên tĩnh.", "Hải sản tươi không?", "Cho tôi một con cua."], dialoguePrompt: "Order seafood in Quy Nhon.", imageUrl: "https://placehold.co/600x400/B9E2A0/FFF?text=Quy+Nhon", status: 'locked', performance: null },
-            { id: 13, coords: [12.2388, 109.1967], scenarioTitle: "Beach Activities in Nha Trang", learningFocus: "Water sports, beach plans.", keyPhrases: ["Tôi muốn đi bơi.", "Có lặn biển không?", "Thuê thuyền."], dialoguePrompt: "Plan beach activities in Nha Trang.", imageUrl: "https://placehold.co/600x400/FFD8B1/FFF?text=Nha+Trang", status: 'locked', performance: null },
-            { id: 14, coords: [11.9404, 108.4583], scenarioTitle: "Exploring Da Lat's Charm", learningFocus: "Cool weather, flower gardens.", keyPhrases: ["Đà Lạt mát mẻ.", "Vườn hoa đẹp thật!", "Tôi thích không khí này."], dialoguePrompt: "Comment on Da Lat's weather.", imageUrl: "https://placehold.co/600x400/DAC4F7/FFF?text=Da+Lat", status: 'locked', performance: null },
-            { id: 15, coords: [10.9261, 108.1000], scenarioTitle: "Sand Dunes in Mui Ne", learningFocus: "Dune activities, kite surfing.", keyPhrases: ["Đồi cát đẹp quá!", "Trượt cát vui không?", "Có lướt ván diều?"], dialoguePrompt: "Try sandboarding in Mui Ne.", imageUrl: "https://placehold.co/600x400/FFC8A2/FFF?text=Mui+Ne", status: 'locked', performance: null },
-            { id: 16, coords: [10.3458, 107.0967], scenarioTitle: "Cafe by the Sea in Vung Tau", learningFocus: "Seaside cafe conversations.", keyPhrases: ["Biển chiều đẹp.", "Cho tôi một ly nước cam.", "Ngồi đây dễ chịu."], dialoguePrompt: "Enjoy a Vung Tau cafe.", imageUrl: "https://placehold.co/600x400/A2D2FF/FFF?text=Vung+Tau", status: 'locked', performance: null },
-            { id: 17, coords: [10.7769, 106.7009], scenarioTitle: "Ordering Coffee in HCMC", learningFocus: "Ordering Vietnamese coffee.", keyPhrases: ["Cho tôi một ly...", "Cà phê sữa đá.", "Ít đường."], dialoguePrompt: "Order coffee in HCMC.", imageUrl: "https://placehold.co/600x400/E0E0E0/FFF?text=HCMC+Cafe", status: 'locked', performance: null },
-            { id: 18, coords: [10.0452, 105.7468], scenarioTitle: "Floating Market in Can Tho", learningFocus: "Buying at a floating market.", keyPhrases: ["Chợ nổi Cái Răng.", "Trái cây tươi quá!", "Bán cho tôi một ký xoài."], dialoguePrompt: "Buy fruit in Can Tho.", imageUrl: "https://placehold.co/600x400/FBE7C6/000?text=Mekong", status: 'locked', performance: null },
-            { id: 19, coords: [10.2100, 103.9900], scenarioTitle: "Beach Day on Phu Quoc", learningFocus: "Beach preferences, snorkeling.", keyPhrases: ["Bãi Sao đẹp nhất.", "Nước biển trong xanh.", "Đi lặn ngắm san hô."], dialoguePrompt: "Plan a beach day on Phu Quoc.", imageUrl: "https://placehold.co/600x400/B4F8C8/FFF?text=Phu+Quoc", status: 'locked', performance: null },
-            { id: 20, coords: [8.6880, 106.6000], scenarioTitle: "Exploring Con Dao Islands", learningFocus: "History, nature conservation.", keyPhrases: ["Nhà tù Côn Đảo.", "Lịch sử đặc biệt.", "Bảo tồn rùa biển."], dialoguePrompt: "Ask about Con Dao's history.", imageUrl: "https://placehold.co/600x400/A0E7E5/FFF?text=Con+Dao", status: 'locked', performance: null }
+        // Define Alexa's lessons (North to Central) - 10 Episodes
+        const alexaStoryLessons = [
+            { id: 'alexa_ep1', coords: [21.2212, 105.8040], scenarioTitle: "Airport Arrival & Taxi", learningFocus: "Customs, taxi, directions.", keyPhrases: ["Xin chào", "Taxi ở đâu?", "Đến khách sạn này.", "Bao nhiêu tiền?"], dialoguePrompt: "Navigate immigration and find a taxi.", imageUrl: "https://placehold.co/600x400/87CEEB/FFF?text=Noi+Bai+Airport", status: 'current', performance: null },
+            { id: 'alexa_ep2', coords: [21.0338, 105.8522], scenarioTitle: "First Bowl of Phở", learningFocus: "Ordering food, menu items.", keyPhrases: ["Cho tôi một bát phở bò.", "Không hành.", "Ngon quá!", "Tính tiền."], dialoguePrompt: "Order Phở at a street stall.", imageUrl: "https://placehold.co/600x400/FFD700/000?text=Hanoi+Pho", status: 'locked', performance: null },
+            { id: 'alexa_ep3', coords: [21.0288, 105.8358], scenarioTitle: "Cultural Visit (Temple of Lit.)", learningFocus: "Info, opening hours, tickets.", keyPhrases: ["Vé vào cổng?", "Mở cửa lúc mấy giờ?", "Chụp ảnh được không?"], dialoguePrompt: "Visit Temple of Literature.", imageUrl: "https://placehold.co/600x400/3CB371/FFF?text=Temple+Lit", status: 'locked', performance: null },
+            { id: 'alexa_ep4', coords: [20.9101, 107.1839], scenarioTitle: "Ha Long Bay Cruise", learningFocus: "Booking cruise, activities.", keyPhrases: ["Tour đi Vịnh Hạ Long?", "Có kayak không?", "Ngắm hoàng hôn."], dialoguePrompt: "Inquire about a Ha Long Bay day cruise.", imageUrl: "https://placehold.co/600x400/4682B4/FFF?text=Ha+Long+Cruise", status: 'locked', performance: null },
+            { id: 'alexa_ep5', coords: [16.4637, 107.5909], scenarioTitle: "City Tour by Cyclo (Hue)", learningFocus: "Negotiating price, directions.", keyPhrases: ["Đi một vòng thành phố?", "Giá bao nhiêu?", "Đến cầu Tràng Tiền."], dialoguePrompt: "Negotiate a cyclo tour in Hue.", imageUrl: "https://placehold.co/600x400/FFA07A/000?text=Hue+Cyclo", status: 'locked', performance: null },
+            { id: 'alexa_ep6', coords: [16.4720, 107.5870], scenarioTitle: "Shopping at Dong Ba Market (Hue)", learningFocus: "Bargaining, finding items.", keyPhrases: ["Nón lá này đẹp quá!", "Bớt một chút được không?", "Tôi mua cái này."], dialoguePrompt: "Buy a souvenir at Dong Ba Market.", imageUrl: "https://placehold.co/600x400/FF6347/FFF?text=Dong+Ba+Market", status: 'locked', performance: null },
+            { id: 'alexa_ep7', coords: [16.2000, 108.1333], scenarioTitle: "Hai Van Pass Journey", learningFocus: "Describing views, road trip talk.", keyPhrases: ["Cảnh đẹp tuyệt vời!", "Dừng lại chụp ảnh.", "Đường này có dốc không?"], dialoguePrompt: "Stop at a viewpoint on Hai Van Pass.", imageUrl: "https://placehold.co/600x400/6495ED/FFF?text=Hai+Van+Pass", status: 'locked', performance: null },
+            { id: 'alexa_ep8', coords: [15.9970, 108.2630], scenarioTitle: "Marble Mountains (Da Nang)", learningFocus: "Asking about legends, buying souvenirs.", keyPhrases: ["Ngũ Hành Sơn.", "Leo lên hang động.", "Mua đồ lưu niệm."], dialoguePrompt: "Explore a cave in Marble Mountains.", imageUrl: "https://placehold.co/600x400/B0C4DE/000?text=Marble+Mountains", status: 'locked', performance: null },
+            { id: 'alexa_ep9', coords: [15.8780, 108.3300], scenarioTitle: "Cooking Class in Hoi An", learningFocus: "Ingredients, cooking steps.", keyPhrases: ["Học nấu ăn.", "Món này làm thế nào?", "Thêm gia vị."], dialoguePrompt: "Participate in a Hoi An cooking class.", imageUrl: "https://placehold.co/600x400/9ACD32/000?text=Hoi+An+Cooking", status: 'locked', performance: null },
+            { id: 'alexa_ep10', coords: [15.9110, 108.3648], scenarioTitle: "Beach Relaxation (An Bang)", learningFocus: "Ordering drinks, beach talk.", keyPhrases: ["Cho tôi một quả dừa.", "Biển có sóng không?", "Nước có ấm không?"], dialoguePrompt: "Relax at An Bang beach.", imageUrl: "https://placehold.co/600x400/ADD8E6/000?text=An+Bang+Beach", status: 'locked', performance: null }
         ];
 
-        // Sample data for Stories page
+        const brianStoryLessons = [
+            { id: 'brian_ep1', coords: [10.0370, 105.7882], scenarioTitle: "Dinner with In-Laws (Can Tho)", learningFocus: "Table manners, family vocab.", keyPhrases: ["Mời cả nhà ăn cơm.", "Món này ngon quá!", "Để con giúp."], dialoguePrompt: "Compliment food with in-laws.", imageUrl: "https://placehold.co/600x400/90EE90/000?text=Family+Dinner", status: 'current', performance: null },
+            { id: 'brian_ep2', coords: [10.2380, 106.3760], scenarioTitle: "Orchard Visit (Ben Tre)", learningFocus: "Fruits, farming.", keyPhrases: ["Trái cây này là gì?", "Vườn rộng quá!", "Hái thử được không?"], dialoguePrompt: "Ask about fruits in an orchard.", imageUrl: "https://placehold.co/600x400/FFB6C1/000?text=Ben+Tre+Orchard", status: 'locked', performance: null },
+            { id: 'brian_ep3', coords: [9.6038, 105.9720], scenarioTitle: "Local Festival (Soc Trang)", learningFocus: "Festival activities, traditions.", keyPhrases: ["Lễ hội vui quá!", "Đây là truyền thống gì?", "Mọi người làm gì?"], dialoguePrompt: "Ask about festival activities.", imageUrl: "https://placehold.co/600x400/E6E6FA/000?text=Soc+Trang+Festival", status: 'locked', performance: null },
+            { id: 'brian_ep4', coords: [10.0452, 105.7468], scenarioTitle: "Cai Rang Floating Market", learningFocus: "Buying goods, boat interactions.", keyPhrases: ["Chợ nổi buổi sáng.", "Bán cho tôi cái này.", "Thuyền của bạn đẹp!"], dialoguePrompt: "Buy something at the floating market.", imageUrl: "https://placehold.co/600x400/F0E68C/000?text=Cai+Rang+Market", status: 'locked', performance: null },
+            { id: 'brian_ep5', coords: [10.3500, 105.6000], scenarioTitle: "Visiting Vinh Trang Pagoda (My Tho)", learningFocus: "Religious sites, respect.", keyPhrases: ["Chùa Vĩnh Tràng.", "Thật là trang nghiêm.", "Đi nhẹ, nói khẽ."], dialoguePrompt: "Show respect at Vinh Trang Pagoda.", imageUrl: "https://placehold.co/600x400/FAFAD2/000?text=Vinh+Trang+Pagoda", status: 'locked', performance: null },
+            { id: 'brian_ep6', coords: [9.8000, 105.5000], scenarioTitle: "Fishing with Locals (Mekong)", learningFocus: "Fishing terms, daily life.", keyPhrases: ["Đi câu cá.", "Con cá này to quá!", "Cuộc sống ở đây thế nào?"], dialoguePrompt: "Try fishing with a local.", imageUrl: "https://placehold.co/600x400/AFEEEE/000?text=Mekong+Fishing", status: 'locked', performance: null },
+            { id: 'brian_ep7', coords: [10.1500, 106.2000], scenarioTitle: "Learning a Folk Song", learningFocus: "Music, cultural expression.", keyPhrases: ["Bài hát này hay quá.", "Dạy tôi hát được không?", "Đàn ca tài tử."], dialoguePrompt: "Ask someone to teach you a folk song.", imageUrl: "https://placehold.co/600x400/DB7093/FFF?text=Folk+Song", status: 'locked', performance: null },
+            { id: 'brian_ep8', coords: [10.2400, 106.3800], scenarioTitle: "Making Coconut Candy (Ben Tre)", learningFocus: "Crafts, local products.", keyPhrases: ["Kẹo dừa Bến Tre.", "Làm kẹo này thế nào?", "Tôi muốn thử làm."], dialoguePrompt: "Learn about coconut candy making.", imageUrl: "https://placehold.co/600x400/FFEFD5/000?text=Coconut+Candy", status: 'locked', performance: null },
+            { id: 'brian_ep9', coords: [10.0300, 105.7800], scenarioTitle: "Family Anniversary Party (Can Tho)", learningFocus: "Celebrations, giving wishes.", keyPhrases: ["Chúc mừng kỷ niệm!", "Chúc gia đình hạnh phúc.", "Mọi người thật vui vẻ."], dialoguePrompt: "Offer congratulations at a party.", imageUrl: "https://placehold.co/600x400/FFDAB9/000?text=Family+Party", status: 'locked', performance: null },
+            { id: 'brian_ep10', coords: [9.9000, 105.7500], scenarioTitle: "A Quiet Evening by the River", learningFocus: "Relaxed conversation, nature.", keyPhrases: ["Buổi tối yên bình.", "Sông Hậu đẹp quá.", "Ngắm trăng."], dialoguePrompt: "Enjoy a peaceful evening chat.", imageUrl: "https://placehold.co/600x400/E0FFFF/000?text=Mekong+Evening", status: 'locked', performance: null }
+        ];
+
+        const christineStoryLessons = [
+            { id: 'christine_ep1', coords: [16.0545, 108.2208], scenarioTitle: "Business Meeting (Da Nang)", learningFocus: "Formal intros, business cards.", keyPhrases: ["Rất vui được gặp anh/chị.", "Đây là danh thiếp của tôi.", "Thảo luận về dự án."], dialoguePrompt: "Introduce yourself formally.", imageUrl: "https://placehold.co/600x400/B0E0E6/000?text=Da+Nang+Meeting", status: 'current', performance: null },
+            { id: 'christine_ep2', coords: [15.7731, 108.2905], scenarioTitle: "Historical Research (My Son)", learningFocus: "Detailed history, architecture.", keyPhrases: ["Di tích này bao nhiêu tuổi?", "Kiến trúc này ý nghĩa gì?", "Nghiên cứu văn hóa Chăm."], dialoguePrompt: "Ask about Cham architecture.", imageUrl: "https://placehold.co/600x400/FFE4B5/000?text=My+Son+Research", status: 'locked', performance: null },
+            { id: 'christine_ep3', coords: [12.6675, 108.0470], scenarioTitle: "Coffee Highlands (Buon Ma Thuot)", learningFocus: "Coffee production, tasting.", keyPhrases: ["Cà phê ở đây nổi tiếng.", "Quy trình trồng cà phê?", "Thử cà phê chồn."], dialoguePrompt: "Ask about coffee making.", imageUrl: "https://placehold.co/600x400/D2B48C/FFF?text=Coffee+Plantation", status: 'locked', performance: null },
+            { id: 'christine_ep4', coords: [16.0620, 108.2240], scenarioTitle: "Cham Museum Visit (Da Nang)", learningFocus: "Artifacts, historical periods.", keyPhrases: ["Bảo tàng Chăm.", "Hiện vật này từ thế kỷ nào?", "Rất ấn tượng."], dialoguePrompt: "Discuss an artifact at Cham Museum.", imageUrl: "https://placehold.co/600x400/F08080/FFF?text=Cham+Museum", status: 'locked', performance: null },
+            { id: 'christine_ep5', coords: [16.1950, 107.8500], scenarioTitle: "Eco-Tourism Project (Bach Ma)", learningFocus: "Environment, sustainability.", keyPhrases: ["Vườn quốc gia Bạch Mã.", "Bảo vệ môi trường.", "Du lịch sinh thái bền vững."], dialoguePrompt: "Discuss an eco-project.", imageUrl: "https://placehold.co/600x400/98FB98/000?text=Bach+Ma+Park", status: 'locked', performance: null },
+            { id: 'christine_ep6', coords: [15.8770, 108.3280], scenarioTitle: "Market Survey (Hoi An)", learningFocus: "Market research, suppliers.", keyPhrases: ["Khảo sát thị trường.", "Nguồn cung cấp ở đâu?", "Giá cả hợp lý."], dialoguePrompt: "Conduct a market survey.", imageUrl: "https://placehold.co/600x400/FFDEAD/000?text=Hoi+An+Market", status: 'locked', performance: null },
+            { id: 'christine_ep7', coords: [16.4600, 107.5800], scenarioTitle: "Presenting Findings (Hue)", learningFocus: "Formal presentation, Q&A.", keyPhrases: ["Trình bày kết quả.", "Số liệu cho thấy...", "Có câu hỏi nào không?"], dialoguePrompt: "Present research findings.", imageUrl: "https://placehold.co/600x400/E0FFFF/000?text=Hue+Presentation", status: 'locked', performance: null },
+            { id: 'christine_ep8', coords: [12.2450, 109.1900], scenarioTitle: "Networking Event (Nha Trang)", learningFocus: "Small talk, professional intros.", keyPhrases: ["Rất hân hạnh.", "Công ty của bạn làm gì?", "Chúng ta có thể hợp tác."], dialoguePrompt: "Network at an event.", imageUrl: "https://placehold.co/600x400/FFFACD/000?text=Nha+Trang+Event", status: 'locked', performance: null },
+            { id: 'christine_ep9', coords: [10.8231, 106.6297], scenarioTitle: "Factory Visit (HCMC Outskirts)", learningFocus: "Production process, quality control.", keyPhrases: ["Tham quan nhà máy.", "Quy trình sản xuất.", "Kiểm tra chất lượng."], dialoguePrompt: "Ask about factory production.", imageUrl: "https://placehold.co/600x400/DCDCDC/000?text=Factory+Visit", status: 'locked', performance: null },
+            { id: 'christine_ep10', coords: [16.0700, 108.2200], scenarioTitle: "Contract Finalization (Da Nang)", learningFocus: "Legal terms, signing.", keyPhrases: ["Xem lại hợp đồng.", "Điều khoản thanh toán.", "Ký kết thỏa thuận."], dialoguePrompt: "Discuss final contract terms.", imageUrl: "https://placehold.co/600x400/ADD8E6/000?text=Contract+Signing", status: 'locked', performance: null }
+        ];
+        
+        const davidStoryLessons = [
+            { id: 'david_ep1', coords: [21.0060, 105.8430], scenarioTitle: "Uni Campus Life (Hanoi)", learningFocus: "Student life, classes, plans.", keyPhrases: ["Bạn học ngành gì?", "Lớp này khó không?", "Tối nay đi chơi?"], dialoguePrompt: "Chat with a classmate.", imageUrl: "https://placehold.co/600x400/FFC0CB/000?text=Hanoi+Uni", status: 'current', performance: null },
+            { id: 'david_ep2', coords: [23.0663, 105.2832], scenarioTitle: "Planning Ha Giang Loop", learningFocus: "Routes, safety, guesthouses.", keyPhrases: ["Đi đường nào?", "Có nguy hiểm không?", "Đặt phòng nhà nghỉ."], dialoguePrompt: "Plan Ha Giang Loop with friends.", imageUrl: "https://placehold.co/600x400/87CEFA/000?text=Ha+Giang+Plan", status: 'locked', performance: null },
+            { id: 'david_ep3', coords: [22.4075, 105.6188], scenarioTitle: "Adventure at Ba Be Lake", learningFocus: "Nature, boating, flora/fauna.", keyPhrases: ["Hồ Ba Bể đẹp quá!", "Thuê thuyền đi dạo.", "Con vật kia là gì?"], dialoguePrompt: "Ask boat guide about nature.", imageUrl: "https://placehold.co/600x400/98FB98/000?text=Ba+Be+Lake", status: 'locked', performance: null },
+            { id: 'david_ep4', coords: [21.0350, 105.8480], scenarioTitle: "Street Food Tour (Hanoi)", learningFocus: "Ordering street foods, ingredients.", keyPhrases: ["Bún chả ở đâu ngon?", "Món này cay không?", "Cho thêm rau thơm."], dialoguePrompt: "Try a new street food.", imageUrl: "https://placehold.co/600x400/FFA500/000?text=Hanoi+Street+Food", status: 'locked', performance: null },
+            { id: 'david_ep5', coords: [22.0000, 104.5000], scenarioTitle: "Volunteering (Rural North)", learningFocus: "Teaching English, interacting.", keyPhrases: ["Dạy tiếng Anh.", "Các em học giỏi quá!", "Cùng nhau chơi nhé."], dialoguePrompt: "Interact with local children.", imageUrl: "https://placehold.co/600x400/FFD700/000?text=Rural+Volunteering", status: 'locked', performance: null },
+            { id: 'david_ep6', coords: [22.5390, 104.2890], scenarioTitle: "Ethnic Market (Bac Ha)", learningFocus: "Observing customs, local products.", keyPhrases: ["Chợ phiên Bắc Hà.", "Vải thổ cẩm đẹp quá!", "Mua một ít làm quà."], dialoguePrompt: "Buy a local handicraft.", imageUrl: "https://placehold.co/600x400/DA70D6/FFF?text=Bac+Ha+Market", status: 'locked', performance: null },
+            { id: 'david_ep7', coords: [21.8400, 104.1200], scenarioTitle: "Photography (Mu Cang Chai)", learningFocus: "Landscapes, photography terms.", keyPhrases: ["Ruộng bậc thang.", "Chụp ảnh lúc bình minh.", "Góc này đẹp!"], dialoguePrompt: "Take photos of rice terraces.", imageUrl: "https://placehold.co/600x400/32CD32/FFF?text=Mu+Cang+Chai", status: 'locked', performance: null },
+            { id: 'david_ep8', coords: [21.0300, 105.8530], scenarioTitle: "Water Puppet Show (Hanoi)", learningFocus: "Understanding show, tickets.", keyPhrases: ["Múa rối nước.", "Mua vé ở đâu?", "Hay quá!"], dialoguePrompt: "Watch a water puppet show.", imageUrl: "https://placehold.co/600x400/8A2BE2/FFF?text=Water+Puppets", status: 'locked', performance: null },
+            { id: 'david_ep9', coords: [20.9700, 105.9000], scenarioTitle: "Pottery Village (Bat Trang)", learningFocus: "Traditional crafts, techniques.", keyPhrases: ["Làng gốm Bát Tràng.", "Thử nặn gốm.", "Hoa văn này ý nghĩa gì?"], dialoguePrompt: "Try making pottery.", imageUrl: "https://placehold.co/600x400/A52A2A/FFF?text=Bat+Trang+Pottery", status: 'locked', performance: null },
+            { id: 'david_ep10', coords: [21.0280, 105.8500], scenarioTitle: "Farewell Party (Hanoi)", learningFocus: "Saying goodbye, future plans.", keyPhrases: ["Tạm biệt các bạn.", "Hẹn gặp lại.", "Chúc may mắn!"], dialoguePrompt: "Say farewell to friends.", imageUrl: "https://placehold.co/600x400/FF69B4/FFF?text=Hanoi+Farewell", status: 'locked', performance: null }
+        ];
+
         const storyData = [
-            { id: 'story1', title: 'Alexa', subtitle: 'Tourist story', episodesCompleted: 0, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/7DD3FC/FFF?text=Story+Alexa' },
-            { id: 'story2', title: 'Brian', subtitle: 'Married by Vietnamese', episodesCompleted: 0, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/FDBA74/FFF?text=Story+Brian' },
-            { id: 'story3', title: 'Christine', subtitle: 'Intermediate', episodesCompleted: 10, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/ECFCCB/000?text=Story+Christine' },
-            { id: 'story4', title: 'David', subtitle: 'Student', episodesCompleted: 10, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/A5B4FC/FFF?text=Story+David' },
+            { id: 'story1', title: 'Alexa', subtitle: 'Tourist story', episodesCompleted: 5, totalEpisodes: alexaStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/7DD3FC/FFF?text=Story+Alexa', lessons: alexaStoryLessons },
+            { id: 'story2', title: 'Brian', subtitle: 'Married by Vietnamese', episodesCompleted: 8, totalEpisodes: brianStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/FDBA74/FFF?text=Story+Brian', lessons: brianStoryLessons }, 
+            { id: 'story3', title: 'Christine', subtitle: 'Intermediate', episodesCompleted: 3, totalEpisodes: christineStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/ECFCCB/000?text=Story+Christine', lessons: christineStoryLessons },
+            { id: 'story4', title: 'David', subtitle: 'Student', episodesCompleted: 7, totalEpisodes: davidStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/A5B4FC/FFF?text=Story+David', lessons: davidStoryLessons },
         ];
-
 
         let map; 
         const infoPanel = document.getElementById('info-panel');
@@ -409,10 +402,12 @@
         const nextLocationBtn = document.getElementById('next-location-btn');
         const currentLocationIndicator = document.getElementById('current-location-indicator');
 
-        const markers = [];
-        const latLngs = [];
+        let markers = []; 
+        let latLngs = []; 
         let selectedMarker = null;
         let currentLocationIndex = -1; 
+        let activeStoryLessons = []; 
+        let mapMarkersLayerGroup = null; 
 
         const starFilledSVG = `<svg class="star-filled" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
         const starEmptySVG = `<svg class="star-empty" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4zm0-6a6 6 0 100 12 6 6 0 000-12zm0 1a8 8 0 100 16A8 8 0 0010 2z" clip-rule="evenodd"></path></svg>`;
@@ -420,13 +415,11 @@
         const chevronDownSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
         const chevronUpSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>`;
 
-
         function createLocationIcon(number, isSelected = false, status = 'locked', performance = null) {
             const size = isSelected ? 40 : 30;
             const anchor = isSelected ? [20, 40] : [15, 30];
             let iconHtml = '';
             let statusClassName = '';
-            
             let baseFontSize = '12px'; 
             let selectedFontSize = '16px';
             let checkmarkBaseFontSize = '16px';
@@ -452,20 +445,12 @@
                     iconHtml = `<span style="font-size: ${isSelected ? selectedFontSize : baseFontSize}; line-height: ${size}px;">${number}</span>`;
                     break;
             }
-
-            return L.divIcon({
-                className: `custom-marker-icon ${statusClassName}`,
-                html: iconHtml,
-                iconSize: [size, size],
-                iconAnchor: anchor,
-                popupAnchor: [0, -(size - 2)]
-            });
+            return L.divIcon({ className: `custom-marker-icon ${statusClassName}`, html: iconHtml, iconSize: [size, size], iconAnchor: anchor, popupAnchor: [0, -(size - 2)] });
         }
         
         function getStatusIndicatorHTML(status, performance) {
             let indicatorHTML = '<div class="status-indicator-container">';
             const maxStars = 3;
-            
             if (status === 'completed') {
                 let filledStars = 0;
                 switch (performance) {
@@ -474,48 +459,45 @@
                     case 'bronze': filledStars = 1; break;
                     default: filledStars = 0; 
                 }
-                for (let i = 0; i < filledStars; i++) {
-                    indicatorHTML += starFilledSVG;
-                }
-                for (let i = filledStars; i < maxStars; i++) {
-                    indicatorHTML += starEmptySVG;
-                }
+                for (let i = 0; i < filledStars; i++) indicatorHTML += starFilledSVG;
+                for (let i = filledStars; i < maxStars; i++) indicatorHTML += starEmptySVG;
             } else if (status === 'current') {
                 indicatorHTML += `<button id="start-lesson-action-button" class="start-lesson-button">START LESSON</button>`;
             } else if (status === 'locked') {
                 indicatorHTML += lockSVG;
             }
-            
             indicatorHTML += '</div>';
             return indicatorHTML;
         }
 
         function updateNavigationControls() {
-            if (currentLocationIndex === -1 || learningScenarios.length === 0) {
+            if (currentLocationIndex === -1 || activeStoryLessons.length === 0) {
                 prevLocationBtn.disabled = true;
                 nextLocationBtn.disabled = true;
-                currentLocationIndicator.textContent = `0 / ${learningScenarios.length}`;
+                currentLocationIndicator.textContent = `0 / ${activeStoryLessons.length}`;
                 return;
             }
             prevLocationBtn.disabled = currentLocationIndex === 0;
-            nextLocationBtn.disabled = currentLocationIndex >= learningScenarios.length - 1;
-            currentLocationIndicator.textContent = `${currentLocationIndex + 1} / ${learningScenarios.length}`;
+            nextLocationBtn.disabled = currentLocationIndex >= activeStoryLessons.length - 1;
+            currentLocationIndicator.textContent = `${currentLocationIndex + 1} / ${activeStoryLessons.length}`;
         }
 
         function displayLocationDetails(indexToShow) {
-            if (indexToShow < 0 || indexToShow >= learningScenarios.length) return;
+            if (!activeStoryLessons || indexToShow < 0 || indexToShow >= activeStoryLessons.length) return;
 
             if (selectedMarker) {
                  const prevMarkerArrayIndex = markers.indexOf(selectedMarker);
-                 if (prevMarkerArrayIndex !== -1) {
-                    const prevScenario = learningScenarios[prevMarkerArrayIndex];
+                 if (prevMarkerArrayIndex !== -1 && activeStoryLessons[prevMarkerArrayIndex]) { 
+                    const prevScenario = activeStoryLessons[prevMarkerArrayIndex];
                     markers[prevMarkerArrayIndex].setIcon(createLocationIcon(prevMarkerArrayIndex + 1, false, prevScenario.status, prevScenario.performance));
                  }
             }
             
             currentLocationIndex = indexToShow;
-            const scenario = learningScenarios[currentLocationIndex];
+            const scenario = activeStoryLessons[currentLocationIndex];
             const currentMapMarker = markers[currentLocationIndex];
+
+            if (!scenario || !currentMapMarker) return; 
 
             currentMapMarker.setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
             selectedMarker = currentMapMarker;
@@ -551,17 +533,21 @@
                         if (indicatorDiv) indicatorDiv.innerHTML = newStatusIndicatorHTML.match(/<div class="status-indicator-container">(.*)<\/div>/)[1];
 
                         const nextScenarioIndex = currentLocationIndex + 1;
-                        if (nextScenarioIndex < learningScenarios.length && learningScenarios[nextScenarioIndex].status === 'locked') {
-                            learningScenarios[nextScenarioIndex].status = 'current';
+                        if (nextScenarioIndex < activeStoryLessons.length && activeStoryLessons[nextScenarioIndex].status === 'locked') {
+                            activeStoryLessons[nextScenarioIndex].status = 'current';
                              markers[nextScenarioIndex].setIcon(createLocationIcon(nextScenarioIndex + 1, false, 'current', null));
                         }
                         updateNavigationControls(); 
-                        if (nextScenarioIndex < learningScenarios.length) {
+                        if (nextScenarioIndex < activeStoryLessons.length) {
                             setTimeout(() => displayLocationDetails(nextScenarioIndex), 500);
+                        } else { 
+                            collapseInfoPanel();
                         }
                     }
                 });
             }
+            
+            const panelWasHiddenOrCollapsed = !infoPanel.classList.contains('expanded') || infoPanel.style.transform === 'translateY(100%)';
             
             infoPanel.classList.remove('hidden-fully', 'collapsed'); 
             infoPanel.classList.add('expanded');
@@ -572,23 +558,19 @@
             const panelExpansionHandler = (event) => {
                 if (event.propertyName === 'transform' && infoPanel.classList.contains('expanded')) {
                     infoPanel.removeEventListener('transitionend', panelExpansionHandler); 
-
                     const targetZoom = 11; 
                     const panelHeightForOffset = window.innerHeight * 0.60; 
                     const yOffset = panelHeightForOffset / 2;
                     const projectedLocation = map.project(scenario.coords, targetZoom);
                     const projectedCenter = L.point(projectedLocation.x, projectedLocation.y + yOffset);
                     const targetLatLng = map.unproject(projectedCenter, targetZoom);
-
-                    map.flyTo(targetLatLng, targetZoom, {
-                        duration: 5.0 
-                    });
+                    map.flyTo(targetLatLng, targetZoom, { duration: 5.0 });
                 }
             };
             
-            const isAlreadyExpanded = infoPanel.classList.contains('expanded') && getComputedStyle(infoPanel).transform === 'matrix(1, 0, 0, 1, 0, 0)';
-
-            if (isAlreadyExpanded) {
+            if (panelWasHiddenOrCollapsed) {
+                infoPanel.addEventListener('transitionend', panelExpansionHandler);
+            } else { 
                 const targetZoom = 11;
                 const panelHeightForOffset = window.innerHeight * 0.60;
                 const yOffset = panelHeightForOffset / 2;
@@ -596,56 +578,74 @@
                 const projectedCenter = L.point(projectedLocation.x, projectedLocation.y + yOffset);
                 const targetLatLng = map.unproject(projectedCenter, targetZoom);
                 map.flyTo(targetLatLng, targetZoom, { duration: 5.0 });
-            } else {
-                infoPanel.addEventListener('transitionend', panelExpansionHandler);
-                infoPanel.classList.remove('hidden-fully', 'collapsed');
-                infoPanel.classList.add('expanded');
-                infoPanel.style.transform = ''; 
             }
         }
-
-        function initializeMapPage() {
+        
+        function setupMapInstance() { 
             if (!map) { 
                 map = L.map('map', { zoomControl: false }).setView([16.0, 108.0], 5);
-                
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                    subdomains: 'abcd',
-                    maxZoom: 19 
+                    subdomains: 'abcd', maxZoom: 19 
                 }).addTo(map);
-                
                 L.control.zoom({ position: 'topright' }).addTo(map);
-
-                learningScenarios.forEach((scenario, index) => {
-                    const marker = L.marker(scenario.coords, { icon: createLocationIcon(index + 1, false, scenario.status, scenario.performance) })
-                        .addTo(map)
-                        .on('click', (e) => {
-                            L.DomEvent.stopPropagation(e);
-                            displayLocationDetails(index);
-                        });
-                    markers.push(marker);
-                    latLngs.push(scenario.coords); 
-                });
-                 map.on('click', () => { 
+                mapMarkersLayerGroup = L.layerGroup().addTo(map);
+                map.on('click', () => { 
                     if (map && infoPanel.classList.contains('expanded')) { 
                         collapseInfoPanel();
                     }
                 });
+                mapInitialized = true;
+            }
+        }
+
+        function loadStoryOnMap() {
+            setupMapInstance(); 
+
+            mapMarkersLayerGroup.clearLayers(); 
+            markers.length = 0;
+            latLngs.length = 0;
+            selectedMarker = null; 
+
+            if (!activeStoryLessons || activeStoryLessons.length === 0) {
+                console.warn("No active learning scenarios for this story.");
+                map.setView([16.0, 108.0], 5); 
+                currentLocationIndex = -1;
+                collapseInfoPanel(); 
+                updateNavigationControls();
+                panelTitleElement.textContent = "Scenario Details";
+                infoContent.innerHTML = `<p class="text-gray-600">No lessons in this story yet. Choose another story!</p>`;
+                return;
             }
 
-            if (latLngs.length > 0 && !selectedMarker) { 
-                const bounds = L.latLngBounds(latLngs); 
-                map.fitBounds(bounds.pad(0.05)); 
+            activeStoryLessons.forEach((scenario, index) => {
+                const marker = L.marker(scenario.coords, { icon: createLocationIcon(index + 1, false, scenario.status, scenario.performance) })
+                    .on('click', (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        displayLocationDetails(index);
+                    });
+                markers.push(marker);
+                latLngs.push(scenario.coords);
+                mapMarkersLayerGroup.addLayer(marker);
+            });
+
+            if (latLngs.length > 0) {
+                const bounds = L.latLngBounds(latLngs);
+                map.fitBounds(bounds.pad(0.15)); 
             }
             
-            infoPanel.style.transform = ''; 
-            infoPanel.classList.remove('expanded', 'hidden-fully');
-            infoPanel.classList.add('collapsed');
-            infoContentWrapper.style.display = 'none'; 
-            closePanelBtn.innerHTML = chevronUpSVG; 
-            
-            updateNavigationControls(); 
+            let initialIndexForStory = activeStoryLessons.findIndex(s => s.status === 'current');
+            if (initialIndexForStory === -1 && activeStoryLessons.length > 0) {
+                initialIndexForStory = 0; 
+                activeStoryLessons[0].status = 'current'; 
+                 markers[0].setIcon(createLocationIcon(1, false, 'current', null)); 
+            }
+            currentLocationIndex = initialIndexForStory !== -1 ? initialIndexForStory : -1;
+
+            collapseInfoPanel(); 
+            updateNavigationControls();
         }
+
 
         function collapseInfoPanel() { 
             infoPanel.style.transform = ''; 
@@ -656,8 +656,8 @@
 
             if (selectedMarker) {
                 const prevMarkerIndex = markers.indexOf(selectedMarker);
-                if (prevMarkerIndex !== -1) {
-                    const prevScenario = learningScenarios[prevMarkerIndex];
+                if (prevMarkerIndex !== -1 && activeStoryLessons[prevMarkerIndex]) {
+                    const prevScenario = activeStoryLessons[prevMarkerIndex];
                     markers[prevMarkerIndex].setIcon(createLocationIcon(prevMarkerIndex + 1, false, prevScenario.status, prevScenario.performance));
                 }
                 selectedMarker = null; 
@@ -668,9 +668,9 @@
             infoPanel.style.transform = ''; 
             if (infoPanel.classList.contains('collapsed') && currentLocationIndex !== -1) {
                 displayLocationDetails(currentLocationIndex); 
-            } else if ((infoPanel.classList.contains('hidden-fully') || !infoPanel.classList.contains('expanded')) && currentLocationIndex === -1 && learningScenarios.length > 0) {
-                let initialIndexToOpen = learningScenarios.findIndex(s => s.status === 'current');
-                if (initialIndexToOpen === -1 && learningScenarios.length > 0) initialIndexToOpen = 0; 
+            } else if ((infoPanel.classList.contains('hidden-fully') || !infoPanel.classList.contains('expanded')) && currentLocationIndex === -1 && activeStoryLessons.length > 0) {
+                let initialIndexToOpen = activeStoryLessons.findIndex(s => s.status === 'current');
+                if (initialIndexToOpen === -1 && activeStoryLessons.length > 0) initialIndexToOpen = 0; 
                 if (initialIndexToOpen !== -1) displayLocationDetails(initialIndexToOpen);
             } else if (infoPanel.classList.contains('hidden-fully')) { 
                  infoPanel.classList.remove('hidden-fully','expanded');
@@ -682,71 +682,48 @@
         
         const navItems = document.querySelectorAll('.nav-item');
         const pages = document.querySelectorAll('.page');
-        let mapInitialized = false; 
+        let mapPageFirstLoad = true;
 
         function switchPage(pageId) {
-            pages.forEach(page => {
-                page.classList.remove('active-page');
-                if (page.id === pageId) {
-                    page.classList.add('active-page');
-                }
-            });
+            pages.forEach(page => page.classList.remove('active-page'));
+            document.getElementById(pageId).classList.add('active-page');
+            
             navItems.forEach(item => {
                 item.classList.remove('active-nav-item');
-                if (item.dataset.page === pageId) {
-                    item.classList.add('active-nav-item');
-                }
+                if (item.dataset.page === pageId) item.classList.add('active-nav-item');
             });
 
             if (pageId === 'map-page-content') {
-                if (!mapInitialized) {
-                    initializeMapPage(); 
-                    mapInitialized = true;
-                } else {
-                     setTimeout(() => { 
-                        map.invalidateSize();
-                        if (currentLocationIndex === -1 && latLngs.length > 0) {
-                            const bounds = L.latLngBounds(latLngs);
-                            map.flyToBounds(bounds.pad(0.05), {duration: 1.0}); 
-                        }
-                        if (currentLocationIndex === -1) {
-                            collapseInfoPanel(); 
-                            panelTitleElement.textContent = "Scenario Details"; 
-                            infoContent.innerHTML = `<p class="text-gray-600">Select a scenario marker to begin learning!</p>`; 
+                setupMapInstance(); 
+                setTimeout(() => { 
+                    map.invalidateSize();
+                    if (mapPageFirstLoad || !activeStoryLessons || activeStoryLessons.length === 0) { 
+                        loadStoryOnMap(); 
+                        mapPageFirstLoad = false; 
+                    } else {
+                         if (infoPanel.classList.contains('expanded')) {
+                            closePanelBtn.innerHTML = chevronDownSVG;
                         } else {
-                            if (infoPanel.classList.contains('expanded')) {
-                                closePanelBtn.innerHTML = chevronDownSVG;
-                            } else { 
-                                closePanelBtn.innerHTML = chevronUpSVG;
-                            }
+                            collapseInfoPanel(); 
                         }
-                        updateNavigationControls(); 
-                    }, 0);
-                }
-                infoPanel.style.transform = ''; 
-                infoPanel.classList.remove('hidden-fully');
-                if (!infoPanel.classList.contains('expanded')) { 
-                    infoPanel.classList.add('collapsed');
-                    infoContentWrapper.style.display = 'none';
-                    closePanelBtn.innerHTML = chevronUpSVG;
-                }
-
+                    }
+                }, 0);
+                infoPanel.classList.remove('hidden-fully'); 
             } else {
                 infoPanel.classList.remove('expanded', 'collapsed');
                 infoPanel.classList.add('hidden-fully'); 
             }
         }
 
-        // Function to render story cards
         function renderStoryCards() {
             const gridContainer = document.getElementById('stories-grid-container');
             if (!gridContainer) return;
-            gridContainer.innerHTML = ''; // Clear existing cards
+            gridContainer.innerHTML = ''; 
 
             storyData.forEach(story => {
                 const card = document.createElement('div');
                 card.className = 'story-card';
-                const progressPercentage = (story.episodesCompleted / story.totalEpisodes) * 100;
+                const progressPercentage = story.totalEpisodes > 0 ? (story.episodesCompleted / story.totalEpisodes) * 100 : 0;
                 
                 card.innerHTML = `
                     <img src="${story.backgroundImageUrl}" alt="${story.title}" class="story-card-image" onerror="this.src='https://placehold.co/300x400/CCCCCC/FFF?text=Image+Error'; this.onerror=null;">
@@ -760,59 +737,43 @@
                     </div>
                 `;
                 card.addEventListener('click', () => {
-                    console.log(`Story clicked: ${story.title}`);
+                    console.log(`Story selected: ${story.title}`);
+                    activeStoryLessons = story.lessons || [];
+                    mapPageFirstLoad = true; 
+                    switchPage('map-page-content');
                 });
                 gridContainer.appendChild(card);
             });
         }
 
-
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                switchPage(item.dataset.page);
-            });
-        });
-
+        navItems.forEach(item => item.addEventListener('click', () => switchPage(item.dataset.page)));
+        
         switchPage('stories-page-content'); 
         renderStoryCards(); 
 
-
         closePanelBtn.addEventListener('click', (e) => {
             L.DomEvent.stopPropagation(e);
-            if (infoPanel.classList.contains('expanded')) {
-                collapseInfoPanel();
-            } else if (infoPanel.classList.contains('collapsed')) {
-                expandInfoPanel();
-            }
+            if (infoPanel.classList.contains('expanded')) collapseInfoPanel();
+            else if (infoPanel.classList.contains('collapsed')) expandInfoPanel();
         });
 
         dragHandle.addEventListener('click', expandInfoPanel);
         panelHeader.addEventListener('click', (e) => {
             if (e.target === panelHeader || e.target === panelTitleElement) {
-                if (infoPanel.classList.contains('collapsed')) {
-                    expandInfoPanel();
-                }
+                if (infoPanel.classList.contains('collapsed')) expandInfoPanel();
             }
         });
-
 
         prevLocationBtn.addEventListener('click', () => {
-            if (currentLocationIndex > 0) {
-                displayLocationDetails(currentLocationIndex - 1);
-            }
+            if (currentLocationIndex > 0) displayLocationDetails(currentLocationIndex - 1);
         });
-
         nextLocationBtn.addEventListener('click', () => {
-            if (currentLocationIndex < learningScenarios.length - 1) {
-                displayLocationDetails(currentLocationIndex + 1);
-            }
+            if (currentLocationIndex < activeStoryLessons.length - 1) displayLocationDetails(currentLocationIndex + 1);
         });
         
         L.DomEvent.disableClickPropagation(infoPanel);
+        window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 
-        window.addEventListener('resize', () => {
-            if (map) map.invalidateSize();
-        });
     </script>
 </body>
 </html>
