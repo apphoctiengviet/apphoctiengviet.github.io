@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vietnamese Learning Adventures - START Button</title>
+    <title>Vietnamese Learning Adventures - Reset Map View</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -16,20 +16,46 @@
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior-y: contain;
+            display: flex; /* Use flex to manage layout with bottom nav */
+            flex-direction: column;
+            height: 100vh;
         }
         html, body {
-            height: 100%;
-            width: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: hidden; /* Prevent body scroll, pages will handle their own scroll */
         }
-        #map-container {
+
+        /* Page Content Area */
+        #page-content-area {
+            flex-grow: 1; /* Takes up available space above nav bar */
+            position: relative; /* For absolute positioning of pages */
+            overflow: hidden; /* Important for page transitions if any */
+        }
+        .page {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
+            display: none; /* Hidden by default */
+            flex-direction: column; /* For pages that might have internal flex layouts */
+            overflow-y: auto; /* Allow scrolling within a page if content exceeds height */
+        }
+        .page.active-page {
+            display: flex; /* Show active page, use flex for map container */
+        }
+        
+        /* Specific for map page to ensure map fills its container */
+        #map-page-content {
+             /* Map page itself doesn't need to scroll, map-container handles it */
+            overflow: hidden;
+        }
+
+
+        #map-container {
+            width: 100%;
+            height: 100%; /* Map container takes full height of its page */
             z-index: 1;
         }
         #map {
@@ -37,25 +63,42 @@
             width: 100%;
         }
         #info-panel {
-            position: fixed;
-            bottom: 0;
+            position: fixed; 
+            bottom: 60px; 
             left: 0;
             right: 0;
             width: 100%;
-            height: 60vh; 
             background-color: white;
             box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
             border-top-left-radius: 1.5rem;
             border-top-right-radius: 1.5rem;
             display: flex;
             flex-direction: column; 
-            transition: transform 0.3s ease-in-out;
-            transform: translateY(100%);
+            height: 60vh; /* Default height for expanded state */
+            transform: translateY(100%);  /* Default: hidden off-screen */
+            transition: transform 0.3s ease-in-out, height 0.3s ease-in-out;
             z-index: 1000;
         }
-        #info-panel.active {
+        #info-panel.expanded {
             transform: translateY(0);
+            height: 60vh;
         }
+        #info-panel.collapsed {
+            transform: translateY(0);
+            height: 80px; 
+        }
+        #info-panel.hidden-fully { /* New class to explicitly hide fully */
+             transform: translateY(100%);
+        }
+
+        #info-panel.collapsed #info-content-wrapper,
+        #info-panel.collapsed #info-panel-navigation { 
+            display: none;
+        }
+        #info-panel.collapsed #info-panel-header {
+            border-bottom: none;
+        }
+
 
         /* Marker Base Styles */
         .custom-marker-icon { 
@@ -69,26 +112,12 @@
         }
 
         /* Status-Specific Marker Styles */
-        .custom-marker-icon.status-locked-upcoming {
-            background-color: #3B82F6; /* Tailwind blue-500 */
-        }
-        .custom-marker-icon.status-current {
-            background-color: #10B981; /* Tailwind emerald-500 */
-            animation: pulse-current 2s infinite;
-        }
-        .custom-marker-icon.status-completed-base { 
-            background-color: #047857; 
-        }
-        .custom-marker-icon.status-completed-bronze {
-            background-color: #D97706; 
-        }
-        .custom-marker-icon.status-completed-silver {
-            background-color: #94A3B8; 
-        }
-        .custom-marker-icon.status-completed-gold {
-            background-color: #FACC15; 
-            color: #422006; 
-        }
+        .custom-marker-icon.status-locked-upcoming { background-color: #3B82F6; }
+        .custom-marker-icon.status-current { background-color: #10B981; animation: pulse-current 2s infinite; }
+        .custom-marker-icon.status-completed-base { background-color: #047857; }
+        .custom-marker-icon.status-completed-bronze { background-color: #D97706; }
+        .custom-marker-icon.status-completed-silver { background-color: #94A3B8; }
+        .custom-marker-icon.status-completed-gold { background-color: #FACC15; color: #422006; }
         
         @keyframes pulse-current {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7), 0 2px 5px rgba(0,0,0,0.3); }
@@ -97,18 +126,16 @@
         }
 
         #info-panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1.5rem; 
-            border-bottom: 1px solid #e5e7eb;
-            flex-shrink: 0; 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem 1.5rem; border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0; cursor: pointer; 
         }
         #panel-title { min-width: 0; }
         #close-panel-btn { padding: 0.25rem; }
         #drag-handle {
             width: 40px; height: 4px; background-color: #D1D5DB;
             border-radius: 2px; margin: 0.5rem auto 0.25rem; flex-shrink: 0;
+            cursor: pointer; 
         }
         #info-panel-navigation {
             display: flex; justify-content: space-between; align-items: center;
@@ -119,16 +146,12 @@
 
         #info-content-wrapper {
             flex-grow: 1; overflow-y: auto; padding: 0 1.5rem 1.5rem;
-            -webkit-overflow-scrolling: touch;
+            -webkit-overflow-scrolling: touch; display: block; 
         }
         #info-content img { 
-            height: 160px; 
-            margin-bottom: 1rem; 
-            transition: filter 0.3s ease-in-out;
+            height: 160px; margin-bottom: 1rem; transition: filter 0.3s ease-in-out;
         }
-        #info-content img.grayscale {
-            filter: grayscale(100%);
-        }
+        #info-content img.grayscale { filter: grayscale(100%); }
         .key-phrases-title {
             font-weight: 600; color: #374151; margin-top: 0.75rem; margin-bottom: 0.25rem;
         }
@@ -140,44 +163,90 @@
         }
         
         .status-indicator-container {
-            display: flex;
-            justify-content: center; 
-            align-items: center;
-            margin-top: 0.75rem; 
-            margin-bottom: 1rem; 
+            display: flex; justify-content: center; align-items: center;
+            margin-top: 0.75rem; margin-bottom: 1rem; 
         }
-        .status-indicator-container svg { /* For stars and lock */
-            width: 1.75rem; 
-            height: 1.75rem; 
-            margin-right: 0.25rem; 
+        .status-indicator-container svg { 
+            width: 1.75rem; height: 1.75rem; margin-right: 0.25rem; 
         }
-        .status-indicator-container svg:last-child {
-            margin-right: 0;
-        }
+        .status-indicator-container svg:last-child { margin-right: 0; }
         .star-filled { color: #FACC15; }
         .star-empty { color: #D1D5DB; }
         .lock-icon { color: #6B7280; width: 2rem !important; height: 2rem !important; }
 
         .start-lesson-button {
-            background-color: #10B981; /* Tailwind emerald-500 */
-            color: white;
-            font-weight: 600; /* semibold */
-            padding: 0.75rem 1.5rem; /* py-3 px-6 */
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            background-color: #10B981; color: white; font-weight: 600; 
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
             transition: background-color 0.2s ease-in-out;
         }
-        .start-lesson-button:hover {
-            background-color: #059669; /* Tailwind emerald-600 */
+        .start-lesson-button:hover { background-color: #059669; }
+
+        /* Bottom Navigation Bar */
+        #bottom-nav {
+            width: 100%;
+            height: 60px;
+            background-color: white;
+            border-top: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: fixed; /* Fixed at the bottom */
+            bottom: 0;
+            left: 0;
+            z-index: 1100; /* Above info panel when it's at bottom */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 0.5rem 0;
+            font-size: 0.75rem; /* text-xs */
+            color: #6B7280; /* Tailwind gray-500 */
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+        }
+        .nav-item:hover {
+            color: #10B981; /* Tailwind emerald-500 */
+        }
+        .nav-item.active-nav-item {
+            color: #10B981; /* Tailwind emerald-500 */
+            font-weight: 600; /* semibold */
+        }
+        .nav-item svg { /* Placeholder for icons */
+            width: 1.5rem; /* w-6 */
+            height: 1.5rem; /* h-6 */
+            margin-bottom: 0.25rem; /* mb-1 */
         }
 
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
+<body>
 
-    <div id="map-container">
-        <div id="map"></div>
+    <div id="page-content-area">
+        <div id="map-page-content" class="page active-page">
+            <div id="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <div id="lessons-page-content" class="page">
+            <div class="p-8">
+                <h1 class="text-2xl font-bold text-gray-800">Lessons Overview</h1>
+                <p class="mt-4 text-gray-600">This page will show a list of all lessons, progress, etc.</p>
+            </div>
+        </div>
+
+        <div id="profile-page-content" class="page">
+            <div class="p-8">
+                <h1 class="text-2xl font-bold text-gray-800">User Profile</h1>
+                <p class="mt-4 text-gray-600">User settings and profile information will go here.</p>
+            </div>
+        </div>
     </div>
 
     <div id="info-panel"> 
@@ -185,10 +254,7 @@
         <div id="info-panel-header">
             <h2 id="panel-title" class="text-xl font-bold text-gray-800 truncate">Scenario Details</h2>
             <button id="close-panel-btn" class="text-gray-500 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-            </button>
+                </button>
         </div>
         <div id="info-panel-navigation">
             <button id="prev-location-btn" class="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200">
@@ -206,13 +272,29 @@
         </div>
     </div>
 
+    <nav id="bottom-nav">
+        <div class="nav-item active-nav-item" data-page="map-page-content">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503-8.495l4.875-2.178A.75.75 0 0121 7.22v10.582a.75.75 0 01-1.125.658l-4.875-2.178a.75.75 0 010-1.316l4.875-2.178a.75.75 0 011.125.658zM9 6.75h.008v.008H9V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM15 8.25h.008v.008H15V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+            <span>Map</span>
+        </div>
+        <div class="nav-item" data-page="lessons-page-content">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+            <span>Lessons</span>
+        </div>
+        <div class="nav-item" data-page="profile-page-content">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+            <span>Profile</span>
+        </div>
+    </nav>
+
+
     <script>
         const learningScenarios = [
             { id: 1, coords: [23.0663, 105.2832], scenarioTitle: "Renting a Motorbike in Ha Giang", learningFocus: "Renting vehicles, road conditions.", keyPhrases: ["Tôi muốn thuê xe máy.", "Giá bao nhiêu một ngày?", "Đường có dễ đi không?"], dialoguePrompt: "Rent a motorbike in Ha Giang.", imageUrl: "https://placehold.co/600x400/ABDEE6/FFF?text=Ha+Giang", status: 'completed', performance: 'gold' },
             { id: 2, coords: [22.3369, 103.8439], scenarioTitle: "Trekking in Sapa", learningFocus: "Trekking plans, local customs.", keyPhrases: ["Đi bộ đường dài.", "Thời tiết ngày mai thế nào?", "Bản làng người H'Mông."], dialoguePrompt: "Arrange a trek in Sapa.", imageUrl: "https://placehold.co/600x400/CBAACB/FFF?text=Sapa", status: 'completed', performance: 'silver' },
             { id: 3, coords: [20.6185, 105.3800], scenarioTitle: "Homestay in Mai Chau", learningFocus: "Homestay interactions, local life.", keyPhrases: ["Nhà sàn đẹp quá!", "Món này là gì?", "Cảm ơn gia đình."], dialoguePrompt: "Interact with hosts in Mai Chau.", imageUrl: "https://placehold.co/600x400/FFFFB5/000?text=Mai+Chau", status: 'completed', performance: 'bronze' },
             { id: 4, coords: [21.0285, 105.8542], scenarioTitle: "Greetings by Hoan Kiem Lake", learningFocus: "Basic greetings and introductions.", keyPhrases: ["Chào bạn!", "Bạn có khỏe không?", "Tôi tên là..."], dialoguePrompt: "Greet a new friend in Hanoi.", imageUrl: "https://placehold.co/600x400/A9A9A9/FFF?text=Hanoi", status: 'completed', performance: 'gold' },
-            { id: 5, coords: [20.9101, 107.1839], scenarioTitle: "Boat Tour in Ha Long Bay", learningFocus: "Boat trips, admiring scenery.", keyPhrases: ["Vịnh Hạ Long thật tuyệt vời!", "Hang động này tên là gì?", "Thuyền quay lại khi nào?"], dialoguePrompt: "Ask about islands in Ha Long Bay.", imageUrl: "https://placehold.co/600x400/FFCCB6/FFF?text=Ha+Long", status: 'current', performance: null },
+            { id: 5, coords: [20.9101, 107.1839], scenarioTitle: "Boat Tour in Ha Long Bay", learningFocus: "Boat trips, admiring scenery.", keyPhrases: ["Vịnh Hạ Long thật tuyệt vời!", "Hang động này tên là gì?", "Thuyền quay lại khi nào?"], dialoguePrompt: "Ask about islands in Ha Long Bay.", imageUrl: "https://placehold.co/600x400/FFCCB6/FFF?text=Ha+Long", status: 'current', performance: null }, 
             { id: 6, coords: [20.2518, 105.9707], scenarioTitle: "Boating in Trang An", learningFocus: "Describing landscapes, boat interactions.", keyPhrases: ["Phong cảnh đẹp quá!", "Chèo thuyền cẩn thận nhé.", "Có nhiều hang động."], dialoguePrompt: "Admire scenery in Trang An.", imageUrl: "https://placehold.co/600x400/F3B0C3/FFF?text=Ninh+Binh", status: 'locked', performance: null },
             { id: 7, coords: [17.4784, 106.6009], scenarioTitle: "Exploring Phong Nha Caves", learningFocus: "Cave tours, safety instructions.", keyPhrases: ["Tôi muốn xem hang động.", "Tour này có mạo hiểm không?", "Phải đội mũ bảo hiểm."], dialoguePrompt: "Inquire about a cave tour.", imageUrl: "https://placehold.co/600x400/C4DEF6/FFF?text=Phong+Nha", status: 'locked', performance: null },
             { id: 8, coords: [16.4637, 107.5909], scenarioTitle: "Visiting Hue Imperial City", learningFocus: "Historical sites, significance.", keyPhrases: ["Đây là Đại Nội Huế.", "Vua nào xây dựng nơi này?", "Tìm hiểu về lịch sử."], dialoguePrompt: "Ask about Hue's history.", imageUrl: "https://placehold.co/600x400/D4F0F0/000?text=Hue", status: 'locked', performance: null },
@@ -230,17 +312,10 @@
             { id: 20, coords: [8.6880, 106.6000], scenarioTitle: "Exploring Con Dao Islands", learningFocus: "History, nature conservation.", keyPhrases: ["Nhà tù Côn Đảo.", "Lịch sử đặc biệt.", "Bảo tồn rùa biển."], dialoguePrompt: "Ask about Con Dao's history.", imageUrl: "https://placehold.co/600x400/A0E7E5/FFF?text=Con+Dao", status: 'locked', performance: null }
         ];
 
-        const map = L.map('map', { zoomControl: false }).setView([16.0, 108.0], 5); 
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 19 
-        }).addTo(map);
-        
-        L.control.zoom({ position: 'topright' }).addTo(map);
-
+        let map; // Declare map globally
         const infoPanel = document.getElementById('info-panel');
+        const panelHeader = document.getElementById('info-panel-header'); 
+        const dragHandle = document.getElementById('drag-handle'); 
         const panelTitleElement = document.getElementById('panel-title'); 
         const infoContentWrapper = document.getElementById('info-content-wrapper'); 
         const infoContent = document.getElementById('info-content');
@@ -257,6 +332,8 @@
         const starFilledSVG = `<svg class="star-filled" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
         const starEmptySVG = `<svg class="star-empty" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4zm0-6a6 6 0 100 12 6 6 0 000-12zm0 1a8 8 0 100 16A8 8 0 0010 2z" clip-rule="evenodd"></path></svg>`;
         const lockSVG = `<svg class="lock-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>`;
+        const chevronDownSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
+        const chevronUpSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>`;
 
 
         function createLocationIcon(number, isSelected = false, status = 'locked', performance = null) {
@@ -319,7 +396,6 @@
                     indicatorHTML += starEmptySVG;
                 }
             } else if (status === 'current') {
-                // START Button for current lesson
                 indicatorHTML += `<button id="start-lesson-action-button" class="start-lesson-button">START LESSON</button>`;
             } else if (status === 'locked') {
                 indicatorHTML += lockSVG;
@@ -374,46 +450,38 @@
                 <h3 class="key-phrases-title">Try this:</h3>
                 <p class="scenario-description">${scenario.dialoguePrompt}</p>
             `;
-            if (infoContentWrapper) infoContentWrapper.scrollTop = 0;
+            infoContentWrapper.style.display = 'block'; 
 
-            // Add event listener for the START button if it exists
             const startButton = document.getElementById('start-lesson-action-button');
             if (startButton) {
                 startButton.addEventListener('click', () => {
-                    // Placeholder for starting the lesson
-                    // For now, let's just mark it as completed with 'bronze' and move to the next
-                    // In a real app, this would navigate to a lesson interface.
                     console.log(`Starting lesson: ${scenario.scenarioTitle}`);
                     if (scenario.status === 'current') {
                         scenario.status = 'completed';
-                        scenario.performance = 'bronze'; // Default performance after starting
+                        scenario.performance = 'bronze'; 
                         markers[currentLocationIndex].setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
                         
-                        // Update the status indicator in the panel immediately
                         const newStatusIndicatorHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
                         const indicatorDiv = infoContent.querySelector('.status-indicator-container');
                         if (indicatorDiv) indicatorDiv.innerHTML = newStatusIndicatorHTML.match(/<div class="status-indicator-container">(.*)<\/div>/)[1];
 
-
-                        // Unlock next lesson if exists
                         const nextScenarioIndex = currentLocationIndex + 1;
                         if (nextScenarioIndex < learningScenarios.length && learningScenarios[nextScenarioIndex].status === 'locked') {
                             learningScenarios[nextScenarioIndex].status = 'current';
                              markers[nextScenarioIndex].setIcon(createLocationIcon(nextScenarioIndex + 1, false, 'current', null));
                         }
-                        updateNavigationControls(); // Update prev/next buttons
-                         // Optionally, automatically navigate to the next lesson or refresh view
+                        updateNavigationControls(); 
                         if (nextScenarioIndex < learningScenarios.length) {
                             setTimeout(() => displayLocationDetails(nextScenarioIndex), 500);
                         }
                     }
                 });
             }
-
-
-            if (!infoPanel.classList.contains('active')) {
-                infoPanel.classList.add('active');
-            }
+            
+            infoPanel.classList.remove('hidden-fully', 'collapsed'); 
+            infoPanel.classList.add('expanded');
+            infoPanel.style.transform = ''; 
+            closePanelBtn.innerHTML = chevronDownSVG; 
             updateNavigationControls();
 
             const targetZoom = 11; 
@@ -430,48 +498,154 @@
             });
         }
 
-        learningScenarios.forEach((scenario, index) => {
-            const marker = L.marker(scenario.coords, { icon: createLocationIcon(index + 1, false, scenario.status, scenario.performance) })
-                .addTo(map)
-                .on('click', (e) => {
-                    L.DomEvent.stopPropagation(e);
-                    displayLocationDetails(index);
-                });
-            markers.push(marker);
-            latLngs.push(scenario.coords); 
-        });
+        function initializeMapPage() {
+            if (!map) { 
+                map = L.map('map', { zoomControl: false }).setView([16.0, 108.0], 5);
+                
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 19 
+                }).addTo(map);
+                
+                L.control.zoom({ position: 'topright' }).addTo(map);
 
-        if (latLngs.length > 0) {
-            const bounds = L.latLngBounds(latLngs); 
-            map.fitBounds(bounds.pad(0.15)); 
-        }
-        
-        const initialLessonIndex = 4; 
-        if (learningScenarios.length > initialLessonIndex) {
-            infoPanel.classList.remove('active'); 
-            setTimeout(() => {
-                 displayLocationDetails(initialLessonIndex);
-            }, 100);
-        } else {
+                learningScenarios.forEach((scenario, index) => {
+                    const marker = L.marker(scenario.coords, { icon: createLocationIcon(index + 1, false, scenario.status, scenario.performance) })
+                        .addTo(map)
+                        .on('click', (e) => {
+                            L.DomEvent.stopPropagation(e);
+                            displayLocationDetails(index);
+                        });
+                    markers.push(marker);
+                    latLngs.push(scenario.coords); 
+                });
+            }
+
+            if (latLngs.length > 0) {
+                const bounds = L.latLngBounds(latLngs); 
+                map.fitBounds(bounds.pad(0.05)); 
+            }
+            
+            infoPanel.style.transform = ''; 
+            infoPanel.classList.remove('expanded', 'hidden-fully');
+            infoPanel.classList.add('collapsed');
+            infoContentWrapper.style.display = 'none'; 
+            closePanelBtn.innerHTML = chevronUpSVG; 
+            
             updateNavigationControls(); 
         }
 
-        function closeInfoPanel() {
-            infoPanel.classList.remove('active');
+        function collapseInfoPanel() { 
+            infoPanel.style.transform = ''; 
+            infoPanel.classList.remove('expanded', 'hidden-fully');
+            infoPanel.classList.add('collapsed');
+            infoContentWrapper.style.display = 'none';
+            closePanelBtn.innerHTML = chevronUpSVG; 
+
             if (selectedMarker) {
                 const prevMarkerIndex = markers.indexOf(selectedMarker);
                 if (prevMarkerIndex !== -1) {
                     const prevScenario = learningScenarios[prevMarkerIndex];
                     markers[prevMarkerIndex].setIcon(createLocationIcon(prevMarkerIndex + 1, false, prevScenario.status, prevScenario.performance));
                 }
-                selectedMarker = null;
+                selectedMarker = null; 
             }
         }
 
+        function expandInfoPanel() {
+            infoPanel.style.transform = ''; 
+            if (infoPanel.classList.contains('collapsed') && currentLocationIndex !== -1) {
+                displayLocationDetails(currentLocationIndex); 
+            } else if ((infoPanel.classList.contains('hidden-fully') || !infoPanel.classList.contains('expanded')) && currentLocationIndex === -1 && learningScenarios.length > 0) {
+                let initialIndexToOpen = learningScenarios.findIndex(s => s.status === 'current');
+                if (initialIndexToOpen === -1) initialIndexToOpen = 0; 
+                displayLocationDetails(initialIndexToOpen);
+            } else if (infoPanel.classList.contains('hidden-fully')) { 
+                 infoPanel.classList.remove('hidden-fully','expanded');
+                 infoPanel.classList.add('collapsed');
+                 infoContentWrapper.style.display = 'none';
+                 closePanelBtn.innerHTML = chevronUpSVG;
+            }
+        }
+        
+        // Page Switching Logic
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.page');
+
+        function switchPage(pageId) {
+            pages.forEach(page => {
+                page.classList.remove('active-page');
+                if (page.id === pageId) {
+                    page.classList.add('active-page');
+                }
+            });
+            navItems.forEach(item => {
+                item.classList.remove('active-nav-item');
+                if (item.dataset.page === pageId) {
+                    item.classList.add('active-nav-item');
+                }
+            });
+
+            if (pageId === 'map-page-content') {
+                if (map) {
+                    setTimeout(() => {
+                        map.invalidateSize();
+                        // Reset map view to show all markers
+                        if (latLngs.length > 0) {
+                            const bounds = L.latLngBounds(latLngs);
+                            map.flyToBounds(bounds.pad(0.05), {duration: 1.0}); // Fly to overview
+                        }
+                        // Ensure panel is collapsed and no lesson selected
+                        collapseInfoPanel(); // This will deselect marker and set panel to collapsed
+                        currentLocationIndex = -1; // Explicitly reset current lesson index
+                        updateNavigationControls(); // Update nav indicator to 0/X
+                        panelTitleElement.textContent = "Scenario Details"; // Reset panel title
+                        infoContent.innerHTML = `<p class="text-gray-600">Select a scenario marker to begin learning!</p>`; // Reset panel content
+                    }, 0);
+                }
+                infoPanel.style.transform = ''; 
+                infoPanel.classList.remove('hidden-fully');
+                if (!infoPanel.classList.contains('expanded')) { 
+                    infoPanel.classList.add('collapsed');
+                    infoContentWrapper.style.display = 'none';
+                    closePanelBtn.innerHTML = chevronUpSVG;
+                }
+
+            } else {
+                infoPanel.classList.remove('expanded', 'collapsed');
+                infoPanel.classList.add('hidden-fully'); 
+            }
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                switchPage(item.dataset.page);
+            });
+        });
+
+
+        // Initialize Map Page
+        initializeMapPage(); 
+
         closePanelBtn.addEventListener('click', (e) => {
             L.DomEvent.stopPropagation(e);
-            closeInfoPanel();
+            if (infoPanel.classList.contains('expanded')) {
+                collapseInfoPanel();
+            } else if (infoPanel.classList.contains('collapsed')) {
+                expandInfoPanel();
+            }
         });
+
+        dragHandle.addEventListener('click', expandInfoPanel);
+        panelHeader.addEventListener('click', (e) => {
+            if (e.target === panelHeader || e.target === panelTitleElement) {
+                if (infoPanel.classList.contains('collapsed')) {
+                    expandInfoPanel();
+                }
+            }
+        });
+
 
         prevLocationBtn.addEventListener('click', () => {
             if (currentLocationIndex > 0) {
@@ -480,22 +654,21 @@
         });
 
         nextLocationBtn.addEventListener('click', () => {
-            // This button now primarily navigates. Progression happens via START button.
             if (currentLocationIndex < learningScenarios.length - 1) {
                 displayLocationDetails(currentLocationIndex + 1);
             }
         });
 
         map.on('click', () => {
-            if (infoPanel.classList.contains('active')) {
-                closeInfoPanel();
+            if (infoPanel.classList.contains('expanded')) { 
+                collapseInfoPanel();
             }
         });
         
         L.DomEvent.disableClickPropagation(infoPanel);
 
         window.addEventListener('resize', () => {
-            map.invalidateSize();
+            if (map) map.invalidateSize();
         });
     </script>
 </body>
