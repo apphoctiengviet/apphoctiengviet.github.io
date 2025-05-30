@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vietnamese Learning Adventures - Reset Map View</title>
+    <title>Vietnamese Learning Adventures - Stories Page</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -16,21 +16,22 @@
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior-y: contain;
-            display: flex; /* Use flex to manage layout with bottom nav */
+            display: flex; 
             flex-direction: column;
             height: 100vh;
+            background-color: #f9fafb; /* Tailwind gray-50 for overall page background */
         }
         html, body {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevent body scroll, pages will handle their own scroll */
+            overflow: hidden; 
         }
 
         /* Page Content Area */
         #page-content-area {
-            flex-grow: 1; /* Takes up available space above nav bar */
-            position: relative; /* For absolute positioning of pages */
-            overflow: hidden; /* Important for page transitions if any */
+            flex-grow: 1; 
+            position: relative; 
+            overflow: hidden; 
         }
         .page {
             position: absolute;
@@ -38,24 +39,113 @@
             left: 0;
             width: 100%;
             height: 100%;
-            display: none; /* Hidden by default */
-            flex-direction: column; /* For pages that might have internal flex layouts */
-            overflow-y: auto; /* Allow scrolling within a page if content exceeds height */
+            display: none; 
+            flex-direction: column; 
+            background-color: #f9fafb; /* Default page background */
         }
         .page.active-page {
-            display: flex; /* Show active page, use flex for map container */
+            display: flex; 
         }
         
-        /* Specific for map page to ensure map fills its container */
         #map-page-content {
-             /* Map page itself doesn't need to scroll, map-container handles it */
             overflow: hidden;
+        }
+      
+        /* Stories Page Specific Styles */
+        #stories-page-content {
+            overflow-y: auto; /* Allow scrolling for stories list */
+        }
+        /* REMOVED .stories-header styles as the element is gone */
+
+        .stories-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 columns */
+            gap: 1rem; /* gap-4 */
+            padding: 1rem; /* p-4 */
+        }
+        .story-card {
+            position: relative;
+            border-radius: 0.75rem; /* rounded-xl */
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* shadow-lg */
+            aspect-ratio: 3 / 4; /* Maintain aspect ratio for cards */
+            cursor: pointer;
+        }
+        .story-card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            z-index: 1;
+        }
+        .story-card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%; /* Adjust as needed */
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0.75rem; /* p-3 */
+        }
+        .story-card .card-header-text {
+            position: absolute;
+            top: 1rem; /* p-4 */
+            left: 1rem;
+            right: 1rem;
+            z-index: 3;
+            text-align: center;
+            font-size: 1rem; /* text-md or lg */
+            font-weight: 700; /* font-bold */
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+        }
+         .story-card .card-title {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700; /* font-bold */
+            color: white;
+            margin-bottom: 0.125rem; /* mb-0.5 */
+        }
+        .story-card .card-subtitle {
+            font-size: 0.75rem; /* text-xs */
+            color: #E5E7EB; /* gray-200 */
+            margin-bottom: 0.25rem; /* mb-1 */
+        }
+        .story-card .card-progress {
+            font-size: 0.75rem; /* text-xs */
+            color: #D1D5DB; /* gray-300 */
+        }
+        .load-more-container {
+            padding: 1rem 1rem 2rem; /* p-4 pb-8 */
+            text-align: center;
+        }
+        .load-more-button {
+            background-color: #3B82F6; /* Tailwind blue-500 */
+            color: white;
+            font-weight: 500; /* medium */
+            padding: 0.75rem 2rem; /* py-3 px-8 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: background-color 0.2s ease-in-out;
+        }
+        .load-more-button:hover {
+            background-color: #2563EB; /* Tailwind blue-600 */
+        }
+
+
+        #lessons-page-content .content-padding,
+        #profile-page-content .content-padding {
+             padding: 2rem; /* p-8 */
         }
 
 
         #map-container {
             width: 100%;
-            height: 100%; /* Map container takes full height of its page */
+            height: 100%; 
             z-index: 1;
         }
         #map {
@@ -74,8 +164,8 @@
             border-top-right-radius: 1.5rem;
             display: flex;
             flex-direction: column; 
-            height: 60vh; /* Default height for expanded state */
-            transform: translateY(100%);  /* Default: hidden off-screen */
+            height: 60vh; 
+            transform: translateY(100%);  
             transition: transform 0.3s ease-in-out, height 0.3s ease-in-out;
             z-index: 1000;
         }
@@ -87,7 +177,7 @@
             transform: translateY(0);
             height: 80px; 
         }
-        #info-panel.hidden-fully { /* New class to explicitly hide fully */
+        #info-panel.hidden-fully { 
              transform: translateY(100%);
         }
 
@@ -99,8 +189,6 @@
             border-bottom: none;
         }
 
-
-        /* Marker Base Styles */
         .custom-marker-icon { 
             color: white;
             border-radius: 50%;
@@ -111,7 +199,6 @@
             transition: width 0.15s ease-in-out, height 0.15s ease-in-out, line-height 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        /* Status-Specific Marker Styles */
         .custom-marker-icon.status-locked-upcoming { background-color: #3B82F6; }
         .custom-marker-icon.status-current { background-color: #10B981; animation: pulse-current 2s infinite; }
         .custom-marker-icon.status-completed-base { background-color: #047857; }
@@ -182,45 +269,22 @@
         }
         .start-lesson-button:hover { background-color: #059669; }
 
-        /* Bottom Navigation Bar */
         #bottom-nav {
-            width: 100%;
-            height: 60px;
-            background-color: white;
-            border-top: 1px solid #e5e7eb; /* Tailwind gray-200 */
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            position: fixed; /* Fixed at the bottom */
-            bottom: 0;
-            left: 0;
-            z-index: 1100; /* Above info panel when it's at bottom */
-            flex-shrink: 0; /* Prevent shrinking */
+            width: 100%; height: 60px; background-color: white;
+            border-top: 1px solid #e5e7eb; display: flex;
+            justify-content: space-around; align-items: center;
+            position: fixed; bottom: 0; left: 0;
+            z-index: 1100; flex-shrink: 0;
         }
         .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-            padding: 0.5rem 0;
-            font-size: 0.75rem; /* text-xs */
-            color: #6B7280; /* Tailwind gray-500 */
-            cursor: pointer;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; flex-grow: 1; padding: 0.5rem 0;
+            font-size: 0.75rem; color: #6B7280; cursor: pointer;
             transition: color 0.2s ease-in-out;
         }
-        .nav-item:hover {
-            color: #10B981; /* Tailwind emerald-500 */
-        }
-        .nav-item.active-nav-item {
-            color: #10B981; /* Tailwind emerald-500 */
-            font-weight: 600; /* semibold */
-        }
-        .nav-item svg { /* Placeholder for icons */
-            width: 1.5rem; /* w-6 */
-            height: 1.5rem; /* h-6 */
-            margin-bottom: 0.25rem; /* mb-1 */
-        }
+        .nav-item:hover { color: #10B981; }
+        .nav-item.active-nav-item { color: #10B981; font-weight: 600; }
+        .nav-item svg { width: 1.5rem; height: 1.5rem; margin-bottom: 0.25rem; }
 
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -228,21 +292,29 @@
 <body>
 
     <div id="page-content-area">
-        <div id="map-page-content" class="page active-page">
+        <div id="stories-page-content" class="page active-page">
+            <div class="stories-grid" id="stories-grid-container">
+                </div>
+            <div class="load-more-container">
+                <button class="load-more-button">Load More</button>
+            </div>
+        </div>
+
+        <div id="map-page-content" class="page">
             <div id="map-container">
                 <div id="map"></div>
             </div>
         </div>
 
         <div id="lessons-page-content" class="page">
-            <div class="p-8">
+            <div class="content-padding">
                 <h1 class="text-2xl font-bold text-gray-800">Lessons Overview</h1>
                 <p class="mt-4 text-gray-600">This page will show a list of all lessons, progress, etc.</p>
             </div>
         </div>
 
         <div id="profile-page-content" class="page">
-            <div class="p-8">
+            <div class="content-padding">
                 <h1 class="text-2xl font-bold text-gray-800">User Profile</h1>
                 <p class="mt-4 text-gray-600">User settings and profile information will go here.</p>
             </div>
@@ -273,13 +345,15 @@
     </div>
 
     <nav id="bottom-nav">
-        <div class="nav-item active-nav-item" data-page="map-page-content">
+        <div class="nav-item active-nav-item" data-page="stories-page-content"> 
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg> <span>Stories</span>
+        </div>
+        <div class="nav-item" data-page="map-page-content"> 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503-8.495l4.875-2.178A.75.75 0 0121 7.22v10.582a.75.75 0 01-1.125.658l-4.875-2.178a.75.75 0 010-1.316l4.875-2.178a.75.75 0 011.125.658zM9 6.75h.008v.008H9V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM15 8.25h.008v.008H15V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
             <span>Map</span>
         </div>
         <div class="nav-item" data-page="lessons-page-content">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
-            <span>Lessons</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" /></svg> <span>Lessons</span>
         </div>
         <div class="nav-item" data-page="profile-page-content">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
@@ -289,7 +363,7 @@
 
 
     <script>
-        const learningScenarios = [
+        const learningScenarios = [ // Map page data
             { id: 1, coords: [23.0663, 105.2832], scenarioTitle: "Renting a Motorbike in Ha Giang", learningFocus: "Renting vehicles, road conditions.", keyPhrases: ["Tôi muốn thuê xe máy.", "Giá bao nhiêu một ngày?", "Đường có dễ đi không?"], dialoguePrompt: "Rent a motorbike in Ha Giang.", imageUrl: "https://placehold.co/600x400/ABDEE6/FFF?text=Ha+Giang", status: 'completed', performance: 'gold' },
             { id: 2, coords: [22.3369, 103.8439], scenarioTitle: "Trekking in Sapa", learningFocus: "Trekking plans, local customs.", keyPhrases: ["Đi bộ đường dài.", "Thời tiết ngày mai thế nào?", "Bản làng người H'Mông."], dialoguePrompt: "Arrange a trek in Sapa.", imageUrl: "https://placehold.co/600x400/CBAACB/FFF?text=Sapa", status: 'completed', performance: 'silver' },
             { id: 3, coords: [20.6185, 105.3800], scenarioTitle: "Homestay in Mai Chau", learningFocus: "Homestay interactions, local life.", keyPhrases: ["Nhà sàn đẹp quá!", "Món này là gì?", "Cảm ơn gia đình."], dialoguePrompt: "Interact with hosts in Mai Chau.", imageUrl: "https://placehold.co/600x400/FFFFB5/000?text=Mai+Chau", status: 'completed', performance: 'bronze' },
@@ -312,7 +386,16 @@
             { id: 20, coords: [8.6880, 106.6000], scenarioTitle: "Exploring Con Dao Islands", learningFocus: "History, nature conservation.", keyPhrases: ["Nhà tù Côn Đảo.", "Lịch sử đặc biệt.", "Bảo tồn rùa biển."], dialoguePrompt: "Ask about Con Dao's history.", imageUrl: "https://placehold.co/600x400/A0E7E5/FFF?text=Con+Dao", status: 'locked', performance: null }
         ];
 
-        let map; // Declare map globally
+        // Sample data for Stories page
+        const storyData = [
+            { id: 'story1', title: 'Alexa', subtitle: 'Tourist story', episodesCompleted: 0, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/7DD3FC/FFF?text=Story+Alexa', headerText: 'THEU DÂN VIETNAM' },
+            { id: 'story2', title: 'Brian', subtitle: 'Married by Vietnamese', episodesCompleted: 0, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/FDBA74/FFF?text=Story+Brian' },
+            { id: 'story3', title: 'Christine', subtitle: 'Intermediate', episodesCompleted: 10, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/ECFCCB/000?text=Story+Christine' },
+            { id: 'story4', title: 'David', subtitle: 'Student', episodesCompleted: 10, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/A5B4FC/FFF?text=Story+David', headerText: 'KẾT NỐI VIỆT NAM' },
+        ];
+
+
+        let map; 
         const infoPanel = document.getElementById('info-panel');
         const panelHeader = document.getElementById('info-panel-header'); 
         const dragHandle = document.getElementById('drag-handle'); 
@@ -484,18 +567,42 @@
             closePanelBtn.innerHTML = chevronDownSVG; 
             updateNavigationControls();
 
-            const targetZoom = 11; 
-            requestAnimationFrame(() => {
-                const panelHeightPixels = infoPanel.offsetHeight;
-                const yOffset = panelHeightPixels / 2;
+            const panelExpansionHandler = (event) => {
+                if (event.propertyName === 'transform' && infoPanel.classList.contains('expanded')) {
+                    infoPanel.removeEventListener('transitionend', panelExpansionHandler); 
+
+                    const targetZoom = 11; 
+                    const panelHeightForOffset = window.innerHeight * 0.60; 
+                    const yOffset = panelHeightForOffset / 2;
+                    const projectedLocation = map.project(scenario.coords, targetZoom);
+                    const projectedCenter = L.point(projectedLocation.x, projectedLocation.y + yOffset);
+                    const targetLatLng = map.unproject(projectedCenter, targetZoom);
+
+                    map.flyTo(targetLatLng, targetZoom, {
+                        duration: 5.0 
+                    });
+                }
+            };
+            
+            // Check if the panel is already fully expanded (no transform transition will occur)
+            const isAlreadyExpanded = infoPanel.classList.contains('expanded') && getComputedStyle(infoPanel).transform === 'matrix(1, 0, 0, 1, 0, 0)';
+
+            if (isAlreadyExpanded) {
+                // If already expanded, fly immediately
+                const targetZoom = 11;
+                const panelHeightForOffset = window.innerHeight * 0.60;
+                const yOffset = panelHeightForOffset / 2;
                 const projectedLocation = map.project(scenario.coords, targetZoom);
                 const projectedCenter = L.point(projectedLocation.x, projectedLocation.y + yOffset);
                 const targetLatLng = map.unproject(projectedCenter, targetZoom);
-
-                map.flyTo(targetLatLng, targetZoom, {
-                    duration: 5.0 
-                });
-            });
+                map.flyTo(targetLatLng, targetZoom, { duration: 5.0 });
+            } else {
+                 // If not expanded, add listener and then trigger expansion
+                infoPanel.addEventListener('transitionend', panelExpansionHandler);
+                infoPanel.classList.remove('hidden-fully', 'collapsed');
+                infoPanel.classList.add('expanded');
+                infoPanel.style.transform = ''; // Let CSS class handle transform
+            }
         }
 
         function initializeMapPage() {
@@ -520,9 +627,14 @@
                     markers.push(marker);
                     latLngs.push(scenario.coords); 
                 });
+                 map.on('click', () => { 
+                    if (map && infoPanel.classList.contains('expanded')) { 
+                        collapseInfoPanel();
+                    }
+                });
             }
 
-            if (latLngs.length > 0) {
+            if (latLngs.length > 0 && !selectedMarker) { 
                 const bounds = L.latLngBounds(latLngs); 
                 map.fitBounds(bounds.pad(0.05)); 
             }
@@ -559,8 +671,8 @@
                 displayLocationDetails(currentLocationIndex); 
             } else if ((infoPanel.classList.contains('hidden-fully') || !infoPanel.classList.contains('expanded')) && currentLocationIndex === -1 && learningScenarios.length > 0) {
                 let initialIndexToOpen = learningScenarios.findIndex(s => s.status === 'current');
-                if (initialIndexToOpen === -1) initialIndexToOpen = 0; 
-                displayLocationDetails(initialIndexToOpen);
+                if (initialIndexToOpen === -1 && learningScenarios.length > 0) initialIndexToOpen = 0; 
+                if (initialIndexToOpen !== -1) displayLocationDetails(initialIndexToOpen);
             } else if (infoPanel.classList.contains('hidden-fully')) { 
                  infoPanel.classList.remove('hidden-fully','expanded');
                  infoPanel.classList.add('collapsed');
@@ -569,9 +681,9 @@
             }
         }
         
-        // Page Switching Logic
         const navItems = document.querySelectorAll('.nav-item');
         const pages = document.querySelectorAll('.page');
+        let mapInitialized = false; 
 
         function switchPage(pageId) {
             pages.forEach(page => {
@@ -588,20 +700,28 @@
             });
 
             if (pageId === 'map-page-content') {
-                if (map) {
-                    setTimeout(() => {
+                if (!mapInitialized) {
+                    initializeMapPage(); 
+                    mapInitialized = true;
+                } else {
+                     setTimeout(() => { 
                         map.invalidateSize();
-                        // Reset map view to show all markers
-                        if (latLngs.length > 0) {
+                        if (currentLocationIndex === -1 && latLngs.length > 0) {
                             const bounds = L.latLngBounds(latLngs);
-                            map.flyToBounds(bounds.pad(0.05), {duration: 1.0}); // Fly to overview
+                            map.flyToBounds(bounds.pad(0.05), {duration: 1.0}); 
                         }
-                        // Ensure panel is collapsed and no lesson selected
-                        collapseInfoPanel(); // This will deselect marker and set panel to collapsed
-                        currentLocationIndex = -1; // Explicitly reset current lesson index
-                        updateNavigationControls(); // Update nav indicator to 0/X
-                        panelTitleElement.textContent = "Scenario Details"; // Reset panel title
-                        infoContent.innerHTML = `<p class="text-gray-600">Select a scenario marker to begin learning!</p>`; // Reset panel content
+                        if (currentLocationIndex === -1) {
+                            collapseInfoPanel(); 
+                            panelTitleElement.textContent = "Scenario Details"; 
+                            infoContent.innerHTML = `<p class="text-gray-600">Select a scenario marker to begin learning!</p>`; 
+                        } else {
+                            if (infoPanel.classList.contains('expanded')) {
+                                closePanelBtn.innerHTML = chevronDownSVG;
+                            } else { 
+                                closePanelBtn.innerHTML = chevronUpSVG;
+                            }
+                        }
+                        updateNavigationControls(); 
                     }, 0);
                 }
                 infoPanel.style.transform = ''; 
@@ -618,15 +738,41 @@
             }
         }
 
+        // Function to render story cards
+        function renderStoryCards() {
+            const gridContainer = document.getElementById('stories-grid-container');
+            if (!gridContainer) return;
+            gridContainer.innerHTML = ''; // Clear existing cards
+
+            storyData.forEach(story => {
+                const card = document.createElement('div');
+                card.className = 'story-card';
+                card.innerHTML = `
+                    <img src="${story.backgroundImageUrl}" alt="${story.title}" class="story-card-image" onerror="this.src='https://placehold.co/300x400/CCCCCC/FFF?text=Image+Error'; this.onerror=null;">
+                    ${story.headerText ? `<div class="card-header-text">${story.headerText}</div>` : ''}
+                    <div class="story-card-overlay">
+                        <h3 class="card-title">${story.title}</h3>
+                        <p class="card-subtitle">${story.subtitle}</p>
+                        <p class="card-progress">${story.episodesCompleted}/${story.totalEpisodes} episodes</p>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    console.log(`Story clicked: ${story.title}`);
+                });
+                gridContainer.appendChild(card);
+            });
+        }
+
+
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 switchPage(item.dataset.page);
             });
         });
 
+        switchPage('stories-page-content'); 
+        renderStoryCards(); 
 
-        // Initialize Map Page
-        initializeMapPage(); 
 
         closePanelBtn.addEventListener('click', (e) => {
             L.DomEvent.stopPropagation(e);
@@ -656,12 +802,6 @@
         nextLocationBtn.addEventListener('click', () => {
             if (currentLocationIndex < learningScenarios.length - 1) {
                 displayLocationDetails(currentLocationIndex + 1);
-            }
-        });
-
-        map.on('click', () => {
-            if (infoPanel.classList.contains('expanded')) { 
-                collapseInfoPanel();
             }
         });
         
