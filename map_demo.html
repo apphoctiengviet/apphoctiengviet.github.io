@@ -55,7 +55,6 @@
         #stories-page-content {
             overflow-y: auto; /* Allow scrolling for stories list */
         }
-        /* REMOVED .stories-header styles as the element is gone */
 
         .stories-grid {
             display: grid;
@@ -83,26 +82,14 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 60%; /* Adjust as needed */
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%);
+            height: auto; /* Adjust to content */
+            min-height: 40%; /* Ensure enough space for text and progress bar */
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0) 100%);
             z-index: 2;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             padding: 0.75rem; /* p-3 */
-        }
-        .story-card .card-header-text {
-            position: absolute;
-            top: 1rem; /* p-4 */
-            left: 1rem;
-            right: 1rem;
-            z-index: 3;
-            text-align: center;
-            font-size: 1rem; /* text-md or lg */
-            font-weight: 700; /* font-bold */
-            color: white;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-            text-transform: uppercase;
         }
          .story-card .card-title {
             font-size: 1.25rem; /* text-xl */
@@ -115,10 +102,25 @@
             color: #E5E7EB; /* gray-200 */
             margin-bottom: 0.25rem; /* mb-1 */
         }
-        .story-card .card-progress {
+        .story-card .card-episodes-text { /* New class for "X episodes" text */
             font-size: 0.75rem; /* text-xs */
             color: #D1D5DB; /* gray-300 */
+            margin-bottom: 0.5rem; /* mb-2, space before progress bar */
         }
+        .progress-bar-container {
+            width: 100%;
+            height: 6px; /* Increased height for better visibility */
+            background-color: rgba(255, 255, 255, 0.3); /* Lighter background for progress bar */
+            border-radius: 3px; /* rounded-full */
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #FACC15; /* Gold color for progress, can be dynamic */
+            border-radius: 3px; /* rounded-full */
+            transition: width 0.5s ease-in-out;
+        }
+
         .load-more-container {
             padding: 1rem 1rem 2rem; /* p-4 pb-8 */
             text-align: center;
@@ -388,10 +390,10 @@
 
         // Sample data for Stories page
         const storyData = [
-            { id: 'story1', title: 'Alexa', subtitle: 'Tourist story', episodesCompleted: 0, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/7DD3FC/FFF?text=Story+Alexa', headerText: 'THEU DÂN VIETNAM' },
+            { id: 'story1', title: 'Alexa', subtitle: 'Tourist story', episodesCompleted: 0, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/7DD3FC/FFF?text=Story+Alexa' },
             { id: 'story2', title: 'Brian', subtitle: 'Married by Vietnamese', episodesCompleted: 0, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/FDBA74/FFF?text=Story+Brian' },
             { id: 'story3', title: 'Christine', subtitle: 'Intermediate', episodesCompleted: 10, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/ECFCCB/000?text=Story+Christine' },
-            { id: 'story4', title: 'David', subtitle: 'Student', episodesCompleted: 10, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/A5B4FC/FFF?text=Story+David', headerText: 'KẾT NỐI VIỆT NAM' },
+            { id: 'story4', title: 'David', subtitle: 'Student', episodesCompleted: 10, totalEpisodes: 20, backgroundImageUrl: 'https://placehold.co/300x400/A5B4FC/FFF?text=Story+David' },
         ];
 
 
@@ -584,11 +586,9 @@
                 }
             };
             
-            // Check if the panel is already fully expanded (no transform transition will occur)
             const isAlreadyExpanded = infoPanel.classList.contains('expanded') && getComputedStyle(infoPanel).transform === 'matrix(1, 0, 0, 1, 0, 0)';
 
             if (isAlreadyExpanded) {
-                // If already expanded, fly immediately
                 const targetZoom = 11;
                 const panelHeightForOffset = window.innerHeight * 0.60;
                 const yOffset = panelHeightForOffset / 2;
@@ -597,11 +597,10 @@
                 const targetLatLng = map.unproject(projectedCenter, targetZoom);
                 map.flyTo(targetLatLng, targetZoom, { duration: 5.0 });
             } else {
-                 // If not expanded, add listener and then trigger expansion
                 infoPanel.addEventListener('transitionend', panelExpansionHandler);
                 infoPanel.classList.remove('hidden-fully', 'collapsed');
                 infoPanel.classList.add('expanded');
-                infoPanel.style.transform = ''; // Let CSS class handle transform
+                infoPanel.style.transform = ''; 
             }
         }
 
@@ -747,13 +746,17 @@
             storyData.forEach(story => {
                 const card = document.createElement('div');
                 card.className = 'story-card';
+                const progressPercentage = (story.episodesCompleted / story.totalEpisodes) * 100;
+                
                 card.innerHTML = `
                     <img src="${story.backgroundImageUrl}" alt="${story.title}" class="story-card-image" onerror="this.src='https://placehold.co/300x400/CCCCCC/FFF?text=Image+Error'; this.onerror=null;">
-                    ${story.headerText ? `<div class="card-header-text">${story.headerText}</div>` : ''}
                     <div class="story-card-overlay">
                         <h3 class="card-title">${story.title}</h3>
                         <p class="card-subtitle">${story.subtitle}</p>
-                        <p class="card-progress">${story.episodesCompleted}/${story.totalEpisodes} episodes</p>
+                        <p class="card-episodes-text">${story.totalEpisodes} episodes</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${progressPercentage}%;"></div>
+                        </div>
                     </div>
                 `;
                 card.addEventListener('click', () => {
