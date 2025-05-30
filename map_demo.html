@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vietnamese Learning Adventures - Bottom Nav Fix</title>
+    <title>Vietnamese Learning Adventures - Conditional Map Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -65,7 +65,7 @@
             grid-template-columns: repeat(2, minmax(0, 1fr)); 
             gap: 1rem; 
             padding: 1rem; 
-            /* padding-bottom: 2rem; Removed as .page now has bottom padding */
+            padding-bottom: 2rem; /* Add padding at the bottom if load more is removed */
         }
         .story-card {
             position: relative;
@@ -128,7 +128,7 @@
 
         #lessons-page-content .content-padding,
         #profile-page-content .content-padding {
-             padding: 2rem; /* This is inner padding, page itself will have bottom padding */
+             padding: 2rem; 
         }
 
         #map-container {
@@ -254,6 +254,14 @@
         }
         .nav-item:hover { color: #10B981; }
         .nav-item.active-nav-item { color: #10B981; font-weight: 600; }
+        .nav-item.nav-item-disabled { /* New style for disabled nav items */
+            color: #D1D5DB; /* Tailwind gray-300 */
+            cursor: not-allowed;
+            pointer-events: none; /* Prevents click */
+        }
+        .nav-item.nav-item-disabled:hover {
+            color: #D1D5DB; /* Keep it gray on hover */
+        }
         .nav-item svg { width: 1.5rem; height: 1.5rem; margin-bottom: 0.25rem; }
 
     </style>
@@ -315,8 +323,7 @@
         <div class="nav-item active-nav-item" data-page="stories-page-content"> 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg> <span>Stories</span>
         </div>
-        <div class="nav-item" data-page="map-page-content"> 
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503-8.495l4.875-2.178A.75.75 0 0121 7.22v10.582a.75.75 0 01-1.125.658l-4.875-2.178a.75.75 0 010-1.316l4.875-2.178a.75.75 0 011.125.658zM9 6.75h.008v.008H9V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM15 8.25h.008v.008H15V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+        <div class="nav-item" data-page="map-page-content"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503-8.495l4.875-2.178A.75.75 0 0121 7.22v10.582a.75.75 0 01-1.125.658l-4.875-2.178a.75.75 0 010-1.316l4.875-2.178a.75.75 0 011.125.658zM9 6.75h.008v.008H9V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM15 8.25h.008v.008H15V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
             <span>Map</span>
         </div>
         <div class="nav-item" data-page="lessons-page-content">
@@ -683,6 +690,8 @@
         const navItems = document.querySelectorAll('.nav-item');
         const pages = document.querySelectorAll('.page');
         let mapPageFirstLoad = true;
+        const mapNavItem = document.querySelector('.nav-item[data-page="map-page-content"]'); // Get map nav item
+
 
         function switchPage(pageId) {
             pages.forEach(page => page.classList.remove('active-page'));
@@ -740,16 +749,22 @@
                     console.log(`Story selected: ${story.title}`);
                     activeStoryLessons = story.lessons || [];
                     mapPageFirstLoad = true; 
+                    if (mapNavItem) mapNavItem.classList.remove('nav-item-disabled'); // Enable map nav item
                     switchPage('map-page-content');
                 });
                 gridContainer.appendChild(card);
             });
         }
 
-        navItems.forEach(item => item.addEventListener('click', () => switchPage(item.dataset.page)));
+        navItems.forEach(item => item.addEventListener('click', () => {
+            if (item.classList.contains('nav-item-disabled')) return; // Prevent click if disabled
+            switchPage(item.dataset.page);
+        }));
         
         switchPage('stories-page-content'); 
         renderStoryCards(); 
+        if (mapNavItem) mapNavItem.classList.add('nav-item-disabled'); // Disable map nav item initially
+
 
         closePanelBtn.addEventListener('click', (e) => {
             L.DomEvent.stopPropagation(e);
