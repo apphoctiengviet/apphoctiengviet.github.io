@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vietnamese Learning Adventures - START Button</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    <style>
+        /* Custom font */
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior-y: contain;
+        }
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        #info-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 60vh; 
+            background-color: white;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            display: flex;
+            flex-direction: column; 
+            transition: transform 0.3s ease-in-out;
+            transform: translateY(100%);
+            z-index: 1000;
+        }
+        #info-panel.active {
+            transform: translateY(0);
+        }
+
+        /* Marker Base Styles */
+        .custom-marker-icon { 
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: width 0.15s ease-in-out, height 0.15s ease-in-out, line-height 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        /* Status-Specific Marker Styles */
+        .custom-marker-icon.status-locked-upcoming {
+            background-color: #3B82F6; /* Tailwind blue-500 */
+        }
+        .custom-marker-icon.status-current {
+            background-color: #10B981; /* Tailwind emerald-500 */
+            animation: pulse-current 2s infinite;
+        }
+        .custom-marker-icon.status-completed-base { 
+            background-color: #047857; 
+        }
+        .custom-marker-icon.status-completed-bronze {
+            background-color: #D97706; 
+        }
+        .custom-marker-icon.status-completed-silver {
+            background-color: #94A3B8; 
+        }
+        .custom-marker-icon.status-completed-gold {
+            background-color: #FACC15; 
+            color: #422006; 
+        }
+        
+        @keyframes pulse-current {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7), 0 2px 5px rgba(0,0,0,0.3); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0), 0 2px 5px rgba(0,0,0,0.3); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 2px 5px rgba(0,0,0,0.3); }
+        }
+
+        #info-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.5rem; 
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0; 
+        }
+        #panel-title { min-width: 0; }
+        #close-panel-btn { padding: 0.25rem; }
+        #drag-handle {
+            width: 40px; height: 4px; background-color: #D1D5DB;
+            border-radius: 2px; margin: 0.5rem auto 0.25rem; flex-shrink: 0;
+        }
+        #info-panel-navigation {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 1.5rem; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; 
+        }
+        #info-panel-navigation button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #info-panel-navigation button:disabled svg { color: #9CA3AF; }
+
+        #info-content-wrapper {
+            flex-grow: 1; overflow-y: auto; padding: 0 1.5rem 1.5rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        #info-content img { 
+            height: 160px; 
+            margin-bottom: 1rem; 
+            transition: filter 0.3s ease-in-out;
+        }
+        #info-content img.grayscale {
+            filter: grayscale(100%);
+        }
+        .key-phrases-title {
+            font-weight: 600; color: #374151; margin-top: 0.75rem; margin-bottom: 0.25rem;
+        }
+        .key-phrases-list {
+            list-style-type: disc; margin-left: 1.25rem; font-size: 0.875rem; color: #4B5563; 
+        }
+        .scenario-description {
+            font-size: 0.875rem; color: #4B5563; margin-top: 0.5rem; line-height: 1.6;
+        }
+        
+        .status-indicator-container {
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            margin-top: 0.75rem; 
+            margin-bottom: 1rem; 
+        }
+        .status-indicator-container svg { /* For stars and lock */
+            width: 1.75rem; 
+            height: 1.75rem; 
+            margin-right: 0.25rem; 
+        }
+        .status-indicator-container svg:last-child {
+            margin-right: 0;
+        }
+        .star-filled { color: #FACC15; }
+        .star-empty { color: #D1D5DB; }
+        .lock-icon { color: #6B7280; width: 2rem !important; height: 2rem !important; }
+
+        .start-lesson-button {
+            background-color: #10B981; /* Tailwind emerald-500 */
+            color: white;
+            font-weight: 600; /* semibold */
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            transition: background-color 0.2s ease-in-out;
+        }
+        .start-lesson-button:hover {
+            background-color: #059669; /* Tailwind emerald-600 */
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <div id="info-panel"> 
+        <div id="drag-handle"></div>
+        <div id="info-panel-header">
+            <h2 id="panel-title" class="text-xl font-bold text-gray-800 truncate">Scenario Details</h2>
+            <button id="close-panel-btn" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+            </button>
+        </div>
+        <div id="info-panel-navigation">
+            <button id="prev-location-btn" class="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <span id="current-location-indicator" class="text-sm font-medium text-gray-600"></span>
+            <button id="next-location-btn" class="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+        <div id="info-content-wrapper">
+            <div id="info-content">
+                 <p class="text-gray-600">Select a scenario marker to begin learning!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const learningScenarios = [
+            { id: 1, coords: [23.0663, 105.2832], scenarioTitle: "Renting a Motorbike in Ha Giang", learningFocus: "Renting vehicles, road conditions.", keyPhrases: ["Tôi muốn thuê xe máy.", "Giá bao nhiêu một ngày?", "Đường có dễ đi không?"], dialoguePrompt: "Rent a motorbike in Ha Giang.", imageUrl: "https://placehold.co/600x400/ABDEE6/FFF?text=Ha+Giang", status: 'completed', performance: 'gold' },
+            { id: 2, coords: [22.3369, 103.8439], scenarioTitle: "Trekking in Sapa", learningFocus: "Trekking plans, local customs.", keyPhrases: ["Đi bộ đường dài.", "Thời tiết ngày mai thế nào?", "Bản làng người H'Mông."], dialoguePrompt: "Arrange a trek in Sapa.", imageUrl: "https://placehold.co/600x400/CBAACB/FFF?text=Sapa", status: 'completed', performance: 'silver' },
+            { id: 3, coords: [20.6185, 105.3800], scenarioTitle: "Homestay in Mai Chau", learningFocus: "Homestay interactions, local life.", keyPhrases: ["Nhà sàn đẹp quá!", "Món này là gì?", "Cảm ơn gia đình."], dialoguePrompt: "Interact with hosts in Mai Chau.", imageUrl: "https://placehold.co/600x400/FFFFB5/000?text=Mai+Chau", status: 'completed', performance: 'bronze' },
+            { id: 4, coords: [21.0285, 105.8542], scenarioTitle: "Greetings by Hoan Kiem Lake", learningFocus: "Basic greetings and introductions.", keyPhrases: ["Chào bạn!", "Bạn có khỏe không?", "Tôi tên là..."], dialoguePrompt: "Greet a new friend in Hanoi.", imageUrl: "https://placehold.co/600x400/A9A9A9/FFF?text=Hanoi", status: 'completed', performance: 'gold' },
+            { id: 5, coords: [20.9101, 107.1839], scenarioTitle: "Boat Tour in Ha Long Bay", learningFocus: "Boat trips, admiring scenery.", keyPhrases: ["Vịnh Hạ Long thật tuyệt vời!", "Hang động này tên là gì?", "Thuyền quay lại khi nào?"], dialoguePrompt: "Ask about islands in Ha Long Bay.", imageUrl: "https://placehold.co/600x400/FFCCB6/FFF?text=Ha+Long", status: 'current', performance: null },
+            { id: 6, coords: [20.2518, 105.9707], scenarioTitle: "Boating in Trang An", learningFocus: "Describing landscapes, boat interactions.", keyPhrases: ["Phong cảnh đẹp quá!", "Chèo thuyền cẩn thận nhé.", "Có nhiều hang động."], dialoguePrompt: "Admire scenery in Trang An.", imageUrl: "https://placehold.co/600x400/F3B0C3/FFF?text=Ninh+Binh", status: 'locked', performance: null },
+            { id: 7, coords: [17.4784, 106.6009], scenarioTitle: "Exploring Phong Nha Caves", learningFocus: "Cave tours, safety instructions.", keyPhrases: ["Tôi muốn xem hang động.", "Tour này có mạo hiểm không?", "Phải đội mũ bảo hiểm."], dialoguePrompt: "Inquire about a cave tour.", imageUrl: "https://placehold.co/600x400/C4DEF6/FFF?text=Phong+Nha", status: 'locked', performance: null },
+            { id: 8, coords: [16.4637, 107.5909], scenarioTitle: "Visiting Hue Imperial City", learningFocus: "Historical sites, significance.", keyPhrases: ["Đây là Đại Nội Huế.", "Vua nào xây dựng nơi này?", "Tìm hiểu về lịch sử."], dialoguePrompt: "Ask about Hue's history.", imageUrl: "https://placehold.co/600x400/D4F0F0/000?text=Hue", status: 'locked', performance: null },
+            { id: 9, coords: [16.0479, 108.2208], scenarioTitle: "Directions at Dragon Bridge", learningFocus: "Asking and understanding directions.", keyPhrases: ["Xin lỗi, cho tôi hỏi...", "... ở đâu?", "Đi thẳng.", "Rẽ trái/phải."], dialoguePrompt: "Ask for directions in Da Nang.", imageUrl: "https://placehold.co/600x400/D3D3D3/FFF?text=Da+Nang", status: 'locked', performance: null },
+            { id: 10, coords: [15.7731, 108.2905], scenarioTitle: "My Son Sanctuary", learningFocus: "Ancient history, temple architecture.", keyPhrases: ["Đây là thánh địa Mỹ Sơn.", "Đền này rất cổ.", "Người Chăm xây dựng."], dialoguePrompt: "Ask about My Son temples.", imageUrl: "https://placehold.co/600x400/EFCFE3/FFF?text=My+Son", status: 'locked', performance: null },
+            { id: 11, coords: [15.8801, 108.3380], scenarioTitle: "Shopping in Hoi An", learningFocus: "Shopping, prices, bargaining.", keyPhrases: ["Cái này bao nhiêu tiền?", "Đắt quá!", "Có bớt không?"], dialoguePrompt: "Buy a lantern in Hoi An.", imageUrl: "https://placehold.co/600x400/C0C0C0/FFF?text=Hoi+An", status: 'locked', performance: null },
+            { id: 12, coords: [13.7691, 109.2281], scenarioTitle: "Relaxing in Quy Nhon", learningFocus: "Beach conversations, ordering seafood.", keyPhrases: ["Biển ở đây yên tĩnh.", "Hải sản tươi không?", "Cho tôi một con cua."], dialoguePrompt: "Order seafood in Quy Nhon.", imageUrl: "https://placehold.co/600x400/B9E2A0/FFF?text=Quy+Nhon", status: 'locked', performance: null },
+            { id: 13, coords: [12.2388, 109.1967], scenarioTitle: "Beach Activities in Nha Trang", learningFocus: "Water sports, beach plans.", keyPhrases: ["Tôi muốn đi bơi.", "Có lặn biển không?", "Thuê thuyền."], dialoguePrompt: "Plan beach activities in Nha Trang.", imageUrl: "https://placehold.co/600x400/FFD8B1/FFF?text=Nha+Trang", status: 'locked', performance: null },
+            { id: 14, coords: [11.9404, 108.4583], scenarioTitle: "Exploring Da Lat's Charm", learningFocus: "Cool weather, flower gardens.", keyPhrases: ["Đà Lạt mát mẻ.", "Vườn hoa đẹp thật!", "Tôi thích không khí này."], dialoguePrompt: "Comment on Da Lat's weather.", imageUrl: "https://placehold.co/600x400/DAC4F7/FFF?text=Da+Lat", status: 'locked', performance: null },
+            { id: 15, coords: [10.9261, 108.1000], scenarioTitle: "Sand Dunes in Mui Ne", learningFocus: "Dune activities, kite surfing.", keyPhrases: ["Đồi cát đẹp quá!", "Trượt cát vui không?", "Có lướt ván diều?"], dialoguePrompt: "Try sandboarding in Mui Ne.", imageUrl: "https://placehold.co/600x400/FFC8A2/FFF?text=Mui+Ne", status: 'locked', performance: null },
+            { id: 16, coords: [10.3458, 107.0967], scenarioTitle: "Cafe by the Sea in Vung Tau", learningFocus: "Seaside cafe conversations.", keyPhrases: ["Biển chiều đẹp.", "Cho tôi một ly nước cam.", "Ngồi đây dễ chịu."], dialoguePrompt: "Enjoy a Vung Tau cafe.", imageUrl: "https://placehold.co/600x400/A2D2FF/FFF?text=Vung+Tau", status: 'locked', performance: null },
+            { id: 17, coords: [10.7769, 106.7009], scenarioTitle: "Ordering Coffee in HCMC", learningFocus: "Ordering Vietnamese coffee.", keyPhrases: ["Cho tôi một ly...", "Cà phê sữa đá.", "Ít đường."], dialoguePrompt: "Order coffee in HCMC.", imageUrl: "https://placehold.co/600x400/E0E0E0/FFF?text=HCMC+Cafe", status: 'locked', performance: null },
+            { id: 18, coords: [10.0452, 105.7468], scenarioTitle: "Floating Market in Can Tho", learningFocus: "Buying at a floating market.", keyPhrases: ["Chợ nổi Cái Răng.", "Trái cây tươi quá!", "Bán cho tôi một ký xoài."], dialoguePrompt: "Buy fruit in Can Tho.", imageUrl: "https://placehold.co/600x400/FBE7C6/000?text=Mekong", status: 'locked', performance: null },
+            { id: 19, coords: [10.2100, 103.9900], scenarioTitle: "Beach Day on Phu Quoc", learningFocus: "Beach preferences, snorkeling.", keyPhrases: ["Bãi Sao đẹp nhất.", "Nước biển trong xanh.", "Đi lặn ngắm san hô."], dialoguePrompt: "Plan a beach day on Phu Quoc.", imageUrl: "https://placehold.co/600x400/B4F8C8/FFF?text=Phu+Quoc", status: 'locked', performance: null },
+            { id: 20, coords: [8.6880, 106.6000], scenarioTitle: "Exploring Con Dao Islands", learningFocus: "History, nature conservation.", keyPhrases: ["Nhà tù Côn Đảo.", "Lịch sử đặc biệt.", "Bảo tồn rùa biển."], dialoguePrompt: "Ask about Con Dao's history.", imageUrl: "https://placehold.co/600x400/A0E7E5/FFF?text=Con+Dao", status: 'locked', performance: null }
+        ];
+
+        const map = L.map('map', { zoomControl: false }).setView([16.0, 108.0], 5); 
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19 
+        }).addTo(map);
+        
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        const infoPanel = document.getElementById('info-panel');
+        const panelTitleElement = document.getElementById('panel-title'); 
+        const infoContentWrapper = document.getElementById('info-content-wrapper'); 
+        const infoContent = document.getElementById('info-content');
+        const closePanelBtn = document.getElementById('close-panel-btn');
+        const prevLocationBtn = document.getElementById('prev-location-btn');
+        const nextLocationBtn = document.getElementById('next-location-btn');
+        const currentLocationIndicator = document.getElementById('current-location-indicator');
+
+        const markers = [];
+        const latLngs = [];
+        let selectedMarker = null;
+        let currentLocationIndex = -1; 
+
+        const starFilledSVG = `<svg class="star-filled" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
+        const starEmptySVG = `<svg class="star-empty" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4zm0-6a6 6 0 100 12 6 6 0 000-12zm0 1a8 8 0 100 16A8 8 0 0010 2z" clip-rule="evenodd"></path></svg>`;
+        const lockSVG = `<svg class="lock-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>`;
+
+
+        function createLocationIcon(number, isSelected = false, status = 'locked', performance = null) {
+            const size = isSelected ? 40 : 30;
+            const anchor = isSelected ? [20, 40] : [15, 30];
+            let iconHtml = '';
+            let statusClassName = '';
+            
+            let baseFontSize = '12px'; 
+            let selectedFontSize = '16px';
+            let checkmarkBaseFontSize = '16px';
+            let checkmarkSelectedFontSize = '20px';
+
+            switch (status) {
+                case 'locked':
+                    statusClassName = 'status-locked-upcoming';
+                    iconHtml = `<span style="font-size: ${isSelected ? selectedFontSize : baseFontSize}; line-height: ${size}px; color: #E2E8F0;">${number}</span>`;
+                    break;
+                case 'completed':
+                    iconHtml = `<span style="font-size: ${isSelected ? checkmarkSelectedFontSize : checkmarkBaseFontSize}; line-height: ${size}px;">✓</span>`;
+                    switch (performance) {
+                        case 'gold': statusClassName = 'status-completed-gold'; break;
+                        case 'silver': statusClassName = 'status-completed-silver'; break;
+                        case 'bronze': statusClassName = 'status-completed-bronze'; break;
+                        default: statusClassName = 'status-completed-base'; break;
+                    }
+                    break;
+                case 'current':
+                default:
+                    statusClassName = 'status-current';
+                    iconHtml = `<span style="font-size: ${isSelected ? selectedFontSize : baseFontSize}; line-height: ${size}px;">${number}</span>`;
+                    break;
+            }
+
+            return L.divIcon({
+                className: `custom-marker-icon ${statusClassName}`,
+                html: iconHtml,
+                iconSize: [size, size],
+                iconAnchor: anchor,
+                popupAnchor: [0, -(size - 2)]
+            });
+        }
+        
+        function getStatusIndicatorHTML(status, performance) {
+            let indicatorHTML = '<div class="status-indicator-container">';
+            const maxStars = 3;
+            
+            if (status === 'completed') {
+                let filledStars = 0;
+                switch (performance) {
+                    case 'gold': filledStars = 3; break;
+                    case 'silver': filledStars = 2; break;
+                    case 'bronze': filledStars = 1; break;
+                    default: filledStars = 0; 
+                }
+                for (let i = 0; i < filledStars; i++) {
+                    indicatorHTML += starFilledSVG;
+                }
+                for (let i = filledStars; i < maxStars; i++) {
+                    indicatorHTML += starEmptySVG;
+                }
+            } else if (status === 'current') {
+                // START Button for current lesson
+                indicatorHTML += `<button id="start-lesson-action-button" class="start-lesson-button">START LESSON</button>`;
+            } else if (status === 'locked') {
+                indicatorHTML += lockSVG;
+            }
+            
+            indicatorHTML += '</div>';
+            return indicatorHTML;
+        }
+
+        function updateNavigationControls() {
+            if (currentLocationIndex === -1 || learningScenarios.length === 0) {
+                prevLocationBtn.disabled = true;
+                nextLocationBtn.disabled = true;
+                currentLocationIndicator.textContent = `0 / ${learningScenarios.length}`;
+                return;
+            }
+            prevLocationBtn.disabled = currentLocationIndex === 0;
+            nextLocationBtn.disabled = currentLocationIndex >= learningScenarios.length - 1;
+            currentLocationIndicator.textContent = `${currentLocationIndex + 1} / ${learningScenarios.length}`;
+        }
+
+        function displayLocationDetails(indexToShow) {
+            if (indexToShow < 0 || indexToShow >= learningScenarios.length) return;
+
+            if (selectedMarker) {
+                 const prevMarkerArrayIndex = markers.indexOf(selectedMarker);
+                 if (prevMarkerArrayIndex !== -1) {
+                    const prevScenario = learningScenarios[prevMarkerArrayIndex];
+                    markers[prevMarkerArrayIndex].setIcon(createLocationIcon(prevMarkerArrayIndex + 1, false, prevScenario.status, prevScenario.performance));
+                 }
+            }
+            
+            currentLocationIndex = indexToShow;
+            const scenario = learningScenarios[currentLocationIndex];
+            const currentMapMarker = markers[currentLocationIndex];
+
+            currentMapMarker.setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
+            selectedMarker = currentMapMarker;
+
+            panelTitleElement.textContent = scenario.scenarioTitle; 
+            let phrasesHTML = scenario.keyPhrases.map(phrase => `<li>${phrase}</li>`).join('');
+            const statusIndicatorHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
+            const imageGrayscaleClass = (scenario.status === 'locked' || scenario.status === 'current') ? 'grayscale' : '';
+
+            infoContent.innerHTML = `
+                <img src="${scenario.imageUrl}" alt="${scenario.scenarioTitle}" class="w-full object-cover rounded-lg shadow ${imageGrayscaleClass}" onerror="this.src='https://placehold.co/600x400/CCCCCC/FFF?text=Scenario+Image'; this.onerror=null;">
+                ${statusIndicatorHTML} 
+                <h3 class="key-phrases-title">Learning Focus:</h3>
+                <p class="scenario-description">${scenario.learningFocus}</p>
+                <h3 class="key-phrases-title">Key Phrases:</h3>
+                <ul class="key-phrases-list">${phrasesHTML}</ul>
+                <h3 class="key-phrases-title">Try this:</h3>
+                <p class="scenario-description">${scenario.dialoguePrompt}</p>
+            `;
+            if (infoContentWrapper) infoContentWrapper.scrollTop = 0;
+
+            // Add event listener for the START button if it exists
+            const startButton = document.getElementById('start-lesson-action-button');
+            if (startButton) {
+                startButton.addEventListener('click', () => {
+                    // Placeholder for starting the lesson
+                    // For now, let's just mark it as completed with 'bronze' and move to the next
+                    // In a real app, this would navigate to a lesson interface.
+                    console.log(`Starting lesson: ${scenario.scenarioTitle}`);
+                    if (scenario.status === 'current') {
+                        scenario.status = 'completed';
+                        scenario.performance = 'bronze'; // Default performance after starting
+                        markers[currentLocationIndex].setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
+                        
+                        // Update the status indicator in the panel immediately
+                        const newStatusIndicatorHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
+                        const indicatorDiv = infoContent.querySelector('.status-indicator-container');
+                        if (indicatorDiv) indicatorDiv.innerHTML = newStatusIndicatorHTML.match(/<div class="status-indicator-container">(.*)<\/div>/)[1];
+
+
+                        // Unlock next lesson if exists
+                        const nextScenarioIndex = currentLocationIndex + 1;
+                        if (nextScenarioIndex < learningScenarios.length && learningScenarios[nextScenarioIndex].status === 'locked') {
+                            learningScenarios[nextScenarioIndex].status = 'current';
+                             markers[nextScenarioIndex].setIcon(createLocationIcon(nextScenarioIndex + 1, false, 'current', null));
+                        }
+                        updateNavigationControls(); // Update prev/next buttons
+                         // Optionally, automatically navigate to the next lesson or refresh view
+                        if (nextScenarioIndex < learningScenarios.length) {
+                            setTimeout(() => displayLocationDetails(nextScenarioIndex), 500);
+                        }
+                    }
+                });
+            }
+
+
+            if (!infoPanel.classList.contains('active')) {
+                infoPanel.classList.add('active');
+            }
+            updateNavigationControls();
+
+            const targetZoom = 11; 
+            requestAnimationFrame(() => {
+                const panelHeightPixels = infoPanel.offsetHeight;
+                const yOffset = panelHeightPixels / 2;
+                const projectedLocation = map.project(scenario.coords, targetZoom);
+                const projectedCenter = L.point(projectedLocation.x, projectedLocation.y + yOffset);
+                const targetLatLng = map.unproject(projectedCenter, targetZoom);
+
+                map.flyTo(targetLatLng, targetZoom, {
+                    duration: 5.0 
+                });
+            });
+        }
+
+        learningScenarios.forEach((scenario, index) => {
+            const marker = L.marker(scenario.coords, { icon: createLocationIcon(index + 1, false, scenario.status, scenario.performance) })
+                .addTo(map)
+                .on('click', (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    displayLocationDetails(index);
+                });
+            markers.push(marker);
+            latLngs.push(scenario.coords); 
+        });
+
+        if (latLngs.length > 0) {
+            const bounds = L.latLngBounds(latLngs); 
+            map.fitBounds(bounds.pad(0.15)); 
+        }
+        
+        const initialLessonIndex = 4; 
+        if (learningScenarios.length > initialLessonIndex) {
+            infoPanel.classList.remove('active'); 
+            setTimeout(() => {
+                 displayLocationDetails(initialLessonIndex);
+            }, 100);
+        } else {
+            updateNavigationControls(); 
+        }
+
+        function closeInfoPanel() {
+            infoPanel.classList.remove('active');
+            if (selectedMarker) {
+                const prevMarkerIndex = markers.indexOf(selectedMarker);
+                if (prevMarkerIndex !== -1) {
+                    const prevScenario = learningScenarios[prevMarkerIndex];
+                    markers[prevMarkerIndex].setIcon(createLocationIcon(prevMarkerIndex + 1, false, prevScenario.status, prevScenario.performance));
+                }
+                selectedMarker = null;
+            }
+        }
+
+        closePanelBtn.addEventListener('click', (e) => {
+            L.DomEvent.stopPropagation(e);
+            closeInfoPanel();
+        });
+
+        prevLocationBtn.addEventListener('click', () => {
+            if (currentLocationIndex > 0) {
+                displayLocationDetails(currentLocationIndex - 1);
+            }
+        });
+
+        nextLocationBtn.addEventListener('click', () => {
+            // This button now primarily navigates. Progression happens via START button.
+            if (currentLocationIndex < learningScenarios.length - 1) {
+                displayLocationDetails(currentLocationIndex + 1);
+            }
+        });
+
+        map.on('click', () => {
+            if (infoPanel.classList.contains('active')) {
+                closeInfoPanel();
+            }
+        });
+        
+        L.DomEvent.disableClickPropagation(infoPanel);
+
+        window.addEventListener('resize', () => {
+            map.invalidateSize();
+        });
+    </script>
+</body>
+</html>
