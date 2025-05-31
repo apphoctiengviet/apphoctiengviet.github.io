@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vietnamese Learning Adventures - Stories Page</title>
+    <title>Vietnamese Learning Adventures - Conditional Map Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -19,7 +19,7 @@
             display: flex; 
             flex-direction: column;
             height: 100vh;
-            background-color: #f9fafb; /* Tailwind gray-50 for overall page background */
+            background-color: #f9fafb; 
         }
         html, body {
             margin: 0;
@@ -43,29 +43,29 @@
             flex-direction: column; 
             background-color: #f9fafb; 
             overflow-y: auto;
-            padding: 1rem; /* General padding for pages */
             padding-bottom: 76px; /* 60px for nav + 16px for breathing room */
-            box-sizing: border-box; 
+            box-sizing: border-box; /* Ensure padding is included in height calculation */
         }
         .page.active-page {
             display: flex; 
         }
         
-        #map-page-content, #lesson-view-page { 
+        #map-page-content {
             overflow: hidden;
-            padding: 0; /* These pages manage their own internal scrolling and padding */
+            padding-bottom: 0; /* Map page doesn't need this padding, its content is fixed height */
         }
       
         /* Stories Page Specific Styles */
         #stories-page-content {
-            /* Inherits .page styles, including padding and overflow-y: auto */
+            /* overflow-y: auto; already on .page */
         }
 
         .stories-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr)); 
             gap: 1rem; 
-            /* padding: 1rem; /* Removed, page itself has padding now */
+            padding: 1rem; 
+            padding-bottom: 2rem; /* Add padding at the bottom if load more is removed */
         }
         .story-card {
             position: relative;
@@ -126,11 +126,10 @@
             transition: width 0.5s ease-in-out;
         }
 
-        #lessons-page-content .content-padding, /* This class is no longer used for layout of these pages */
+        #lessons-page-content .content-padding,
         #profile-page-content .content-padding {
-             /* padding: 2rem; /* Padding is now handled by .page */
+             padding: 2rem; 
         }
-
 
         #map-container {
             width: 100%;
@@ -206,19 +205,18 @@
             flex-grow: 1; overflow-y: auto; padding: 0 1.5rem 1.5rem;
             -webkit-overflow-scrolling: touch; display: block; 
         }
-        #info-content img, #lesson-view-page .scenario-image { 
+        #info-content img { 
             height: 160px; margin-bottom: 1rem; transition: filter 0.3s ease-in-out;
-            width: 100%; object-fit: cover; border-radius: 0.5rem; 
         }
-        #info-content img.grayscale, #lesson-view-page .scenario-image.grayscale { filter: grayscale(100%); }
-        .key-phrases-title, .lesson-section-title {
-            font-weight: 600; color: #1F2937; margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.125rem; 
+        #info-content img.grayscale { filter: grayscale(100%); }
+        .key-phrases-title {
+            font-weight: 600; color: #374151; margin-top: 0.75rem; margin-bottom: 0.25rem;
         }
         .key-phrases-list {
             list-style-type: disc; margin-left: 1.25rem; font-size: 0.875rem; color: #4B5563; 
         }
-        .scenario-description, .lesson-text {
-            font-size: 0.95rem; color: #374151; margin-top: 0.5rem; line-height: 1.6;
+        .scenario-description {
+            font-size: 0.875rem; color: #4B5563; margin-top: 0.5rem; line-height: 1.6;
         }
         
         .status-indicator-container {
@@ -233,16 +231,13 @@
         .star-empty { color: #D1D5DB; }
         .lock-icon { color: #6B7280; width: 2rem !important; height: 2rem !important; }
 
-        .start-lesson-button, .action-button {
+        .start-lesson-button {
             background-color: #10B981; color: white; font-weight: 600; 
             padding: 0.75rem 1.5rem; border-radius: 0.5rem; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
             transition: background-color 0.2s ease-in-out;
-            border: none; cursor: pointer;
         }
-        .start-lesson-button:hover, .action-button:hover {
-            background-color: #059669; 
-        }
+        .start-lesson-button:hover { background-color: #059669; }
 
         #bottom-nav {
             width: 100%; height: 60px; background-color: white;
@@ -259,23 +254,15 @@
         }
         .nav-item:hover { color: #10B981; }
         .nav-item.active-nav-item { color: #10B981; font-weight: 600; }
-        .nav-item.nav-item-disabled { color: #D1D5DB; cursor: not-allowed; pointer-events: none; }
-        .nav-item.nav-item-disabled:hover { color: #D1D5DB; }
+        .nav-item.nav-item-disabled { /* New style for disabled nav items */
+            color: #D1D5DB; /* Tailwind gray-300 */
+            cursor: not-allowed;
+            pointer-events: none; /* Prevents click */
+        }
+        .nav-item.nav-item-disabled:hover {
+            color: #D1D5DB; /* Keep it gray on hover */
+        }
         .nav-item svg { width: 1.5rem; height: 1.5rem; margin-bottom: 0.25rem; }
-        
-        /* Lesson View Page Specifics */
-        .lesson-view-header {
-            display: flex; align-items: center; padding: 1rem; 
-            background-color: white; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-            flex-shrink: 0;
-        }
-        .lesson-view-header .back-button { margin-right: 0.75rem; color: #4B5563; }
-        .lesson-view-header .lesson-title { font-size: 1.125rem; font-weight: 600; color: #1F2937; }
-        .lesson-view-footer {
-            padding: 1rem; border-top: 1px solid #e5e7eb; background-color: white;
-            flex-shrink: 0; text-align: center;
-            position: sticky; bottom: 0; /* Make footer sticky within scrollable area */
-        }
 
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -284,7 +271,8 @@
 
     <div id="page-content-area">
         <div id="stories-page-content" class="page active-page">
-            <div class="stories-grid" id="stories-grid-container"></div>
+            <div class="stories-grid" id="stories-grid-container">
+                </div>
             </div>
 
         <div id="map-page-content" class="page">
@@ -292,46 +280,10 @@
                 <div id="map"></div>
             </div>
         </div>
-
         <div id="profile-page-content" class="page">
             <div class="content-padding">
                 <h1 class="text-2xl font-bold text-gray-800">User Profile</h1>
                 <p class="mt-4 text-gray-600">User settings and profile information will go here.</p>
-            </div>
-        </div>
-
-        <div id="lesson-view-page" class="page">
-            <div class="lesson-view-header">
-                <button id="lesson-back-button" class="back-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                </button>
-                <h1 id="lesson-view-title" class="lesson-title">Lesson Title</h1>
-            </div>
-            <div class="lesson-content-scroll">
-                <img id="lesson-view-image" src="https://placehold.co/600x400/CCCCCC/FFF?text=Scenario" alt="Lesson Scenario" class="scenario-image">
-                
-                <div id="lesson-view-scenario-recap">
-                    <h2 class="lesson-section-title">Scenario:</h2>
-                    <p id="lesson-view-dialogue-prompt" class="scenario-description">Dialogue prompt...</p>
-                </div>
-
-                <div id="lesson-view-theory">
-                    <h2 class="lesson-section-title">Theory & Phrases:</h2>
-                    <p id="lesson-view-learning-focus" class="scenario-description">Learning focus...</p>
-                    <ul id="lesson-view-key-phrases" class="key-phrases-list mt-2">
-                        </ul>
-                </div>
-
-                <div id="lesson-view-exercises">
-                    <h2 class="lesson-section-title">Exercises:</h2>
-                    <p class="lesson-text">Exercise 1: Fill in the blanks...</p>
-                    <p class="lesson-text mt-2">Exercise 2: Multiple choice...</p>
-                    </div>
-            </div>
-            <div class="lesson-view-footer">
-                <button id="finish-lesson-button" class="action-button">Finish Lesson</button>
             </div>
         </div>
     </div>
@@ -363,8 +315,7 @@
         <div class="nav-item active-nav-item" data-page="stories-page-content"> 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg> <span>Stories</span>
         </div>
-        <div class="nav-item" data-page="map-page-content"> 
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503-8.495l4.875-2.178A.75.75 0 0121 7.22v10.582a.75.75 0 01-1.125.658l-4.875-2.178a.75.75 0 010-1.316l4.875-2.178a.75.75 0 011.125.658zM9 6.75h.008v.008H9V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM15 8.25h.008v.008H15V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+        <div class="nav-item" data-page="map-page-content"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503-8.495l4.875-2.178A.75.75 0 0121 7.22v10.582a.75.75 0 01-1.125.658l-4.875-2.178a.75.75 0 010-1.316l4.875-2.178a.75.75 0 011.125.658zM9 6.75h.008v.008H9V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM15 8.25h.008v.008H15V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
             <span>Map</span>
         </div>
         <div class="nav-item" data-page="profile-page-content">
@@ -375,7 +326,7 @@
 
 
     <script>
-        // STORY AND LESSON DATA (As per previous update with 10 lessons per story)
+        // Define Alexa's lessons (North to Central) - 10 Episodes
         const alexaStoryLessons = [
             { id: 'alexa_ep1', coords: [21.2212, 105.8040], scenarioTitle: "Airport Arrival & Taxi", learningFocus: "Customs, taxi, directions.", keyPhrases: ["Xin chào", "Taxi ở đâu?", "Đến khách sạn này.", "Bao nhiêu tiền?"], dialoguePrompt: "Navigate immigration and find a taxi.", imageUrl: "https://placehold.co/600x400/87CEEB/FFF?text=Noi+Bai+Airport", status: 'current', performance: null },
             { id: 'alexa_ep2', coords: [21.0338, 105.8522], scenarioTitle: "First Bowl of Phở", learningFocus: "Ordering food, menu items.", keyPhrases: ["Cho tôi một bát phở bò.", "Không hành.", "Ngon quá!", "Tính tiền."], dialoguePrompt: "Order Phở at a street stall.", imageUrl: "https://placehold.co/600x400/FFD700/000?text=Hanoi+Pho", status: 'locked', performance: null },
@@ -388,6 +339,7 @@
             { id: 'alexa_ep9', coords: [15.8780, 108.3300], scenarioTitle: "Cooking Class in Hoi An", learningFocus: "Ingredients, cooking steps.", keyPhrases: ["Học nấu ăn.", "Món này làm thế nào?", "Thêm gia vị."], dialoguePrompt: "Participate in a Hoi An cooking class.", imageUrl: "https://placehold.co/600x400/9ACD32/000?text=Hoi+An+Cooking", status: 'locked', performance: null },
             { id: 'alexa_ep10', coords: [15.9110, 108.3648], scenarioTitle: "Beach Relaxation (An Bang)", learningFocus: "Ordering drinks, beach talk.", keyPhrases: ["Cho tôi một quả dừa.", "Biển có sóng không?", "Nước có ấm không?"], dialoguePrompt: "Relax at An Bang beach.", imageUrl: "https://placehold.co/600x400/ADD8E6/000?text=An+Bang+Beach", status: 'locked', performance: null }
         ];
+
         const brianStoryLessons = [
             { id: 'brian_ep1', coords: [10.0370, 105.7882], scenarioTitle: "Dinner with In-Laws (Can Tho)", learningFocus: "Table manners, family vocab.", keyPhrases: ["Mời cả nhà ăn cơm.", "Món này ngon quá!", "Để con giúp."], dialoguePrompt: "Compliment food with in-laws.", imageUrl: "https://placehold.co/600x400/90EE90/000?text=Family+Dinner", status: 'current', performance: null },
             { id: 'brian_ep2', coords: [10.2380, 106.3760], scenarioTitle: "Orchard Visit (Ben Tre)", learningFocus: "Fruits, farming.", keyPhrases: ["Trái cây này là gì?", "Vườn rộng quá!", "Hái thử được không?"], dialoguePrompt: "Ask about fruits in an orchard.", imageUrl: "https://placehold.co/600x400/FFB6C1/000?text=Ben+Tre+Orchard", status: 'locked', performance: null },
@@ -400,6 +352,7 @@
             { id: 'brian_ep9', coords: [10.0300, 105.7800], scenarioTitle: "Family Anniversary Party (Can Tho)", learningFocus: "Celebrations, giving wishes.", keyPhrases: ["Chúc mừng kỷ niệm!", "Chúc gia đình hạnh phúc.", "Mọi người thật vui vẻ."], dialoguePrompt: "Offer congratulations at a party.", imageUrl: "https://placehold.co/600x400/FFDAB9/000?text=Family+Party", status: 'locked', performance: null },
             { id: 'brian_ep10', coords: [9.9000, 105.7500], scenarioTitle: "A Quiet Evening by the River", learningFocus: "Relaxed conversation, nature.", keyPhrases: ["Buổi tối yên bình.", "Sông Hậu đẹp quá.", "Ngắm trăng."], dialoguePrompt: "Enjoy a peaceful evening chat.", imageUrl: "https://placehold.co/600x400/E0FFFF/000?text=Mekong+Evening", status: 'locked', performance: null }
         ];
+
         const christineStoryLessons = [
             { id: 'christine_ep1', coords: [16.0545, 108.2208], scenarioTitle: "Business Meeting (Da Nang)", learningFocus: "Formal intros, business cards.", keyPhrases: ["Rất vui được gặp anh/chị.", "Đây là danh thiếp của tôi.", "Thảo luận về dự án."], dialoguePrompt: "Introduce yourself formally.", imageUrl: "https://placehold.co/600x400/B0E0E6/000?text=Da+Nang+Meeting", status: 'current', performance: null },
             { id: 'christine_ep2', coords: [15.7731, 108.2905], scenarioTitle: "Historical Research (My Son)", learningFocus: "Detailed history, architecture.", keyPhrases: ["Di tích này bao nhiêu tuổi?", "Kiến trúc này ý nghĩa gì?", "Nghiên cứu văn hóa Chăm."], dialoguePrompt: "Ask about Cham architecture.", imageUrl: "https://placehold.co/600x400/FFE4B5/000?text=My+Son+Research", status: 'locked', performance: null },
@@ -412,6 +365,7 @@
             { id: 'christine_ep9', coords: [10.8231, 106.6297], scenarioTitle: "Factory Visit (HCMC Outskirts)", learningFocus: "Production process, quality control.", keyPhrases: ["Tham quan nhà máy.", "Quy trình sản xuất.", "Kiểm tra chất lượng."], dialoguePrompt: "Ask about factory production.", imageUrl: "https://placehold.co/600x400/DCDCDC/000?text=Factory+Visit", status: 'locked', performance: null },
             { id: 'christine_ep10', coords: [16.0700, 108.2200], scenarioTitle: "Contract Finalization (Da Nang)", learningFocus: "Legal terms, signing.", keyPhrases: ["Xem lại hợp đồng.", "Điều khoản thanh toán.", "Ký kết thỏa thuận."], dialoguePrompt: "Discuss final contract terms.", imageUrl: "https://placehold.co/600x400/ADD8E6/000?text=Contract+Signing", status: 'locked', performance: null }
         ];
+        
         const davidStoryLessons = [
             { id: 'david_ep1', coords: [21.0060, 105.8430], scenarioTitle: "Uni Campus Life (Hanoi)", learningFocus: "Student life, classes, plans.", keyPhrases: ["Bạn học ngành gì?", "Lớp này khó không?", "Tối nay đi chơi?"], dialoguePrompt: "Chat with a classmate.", imageUrl: "https://placehold.co/600x400/FFC0CB/000?text=Hanoi+Uni", status: 'current', performance: null },
             { id: 'david_ep2', coords: [23.0663, 105.2832], scenarioTitle: "Planning Ha Giang Loop", learningFocus: "Routes, safety, guesthouses.", keyPhrases: ["Đi đường nào?", "Có nguy hiểm không?", "Đặt phòng nhà nghỉ."], dialoguePrompt: "Plan Ha Giang Loop with friends.", imageUrl: "https://placehold.co/600x400/87CEFA/000?text=Ha+Giang+Plan", status: 'locked', performance: null },
@@ -425,11 +379,11 @@
             { id: 'david_ep10', coords: [21.0280, 105.8500], scenarioTitle: "Farewell Party (Hanoi)", learningFocus: "Saying goodbye, future plans.", keyPhrases: ["Tạm biệt các bạn.", "Hẹn gặp lại.", "Chúc may mắn!"], dialoguePrompt: "Say farewell to friends.", imageUrl: "https://placehold.co/600x400/FF69B4/FFF?text=Hanoi+Farewell", status: 'locked', performance: null }
         ];
 
-        const storyData = [ // Main data for story cards
-            { id: 'story1', title: 'Alexa', subtitle: 'Tourist story', episodesCompleted: 0, totalEpisodes: alexaStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/7DD3FC/FFF?text=Story+Alexa', lessons: alexaStoryLessons },
-            { id: 'story2', title: 'Brian', subtitle: 'Married by Vietnamese', episodesCompleted: 0, totalEpisodes: brianStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/FDBA74/FFF?text=Story+Brian', lessons: brianStoryLessons }, 
-            { id: 'story3', title: 'Christine', subtitle: 'Intermediate', episodesCompleted: 0, totalEpisodes: christineStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/ECFCCB/000?text=Story+Christine', lessons: christineStoryLessons },
-            { id: 'story4', title: 'David', subtitle: 'Student', episodesCompleted: 0, totalEpisodes: davidStoryLessons.length, backgroundImageUrl: 'https://placehold.co/600x400/A5B4FC/FFF?text=Story+David', lessons: davidStoryLessons },
+        const storyData = [
+            { id: 'story1', title: 'Alexa', subtitle: 'Tourist story', episodesCompleted: 5, totalEpisodes: alexaStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/7DD3FC/FFF?text=Story+Alexa', lessons: alexaStoryLessons },
+            { id: 'story2', title: 'Brian', subtitle: 'Married by Vietnamese', episodesCompleted: 8, totalEpisodes: brianStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/FDBA74/FFF?text=Story+Brian', lessons: brianStoryLessons }, 
+            { id: 'story3', title: 'Christine', subtitle: 'Intermediate', episodesCompleted: 3, totalEpisodes: christineStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/ECFCCB/000?text=Story+Christine', lessons: christineStoryLessons },
+            { id: 'story4', title: 'David', subtitle: 'Student', episodesCompleted: 7, totalEpisodes: davidStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/A5B4FC/FFF?text=Story+David', lessons: davidStoryLessons },
         ];
 
         let map; 
@@ -439,14 +393,6 @@
         const panelTitleElement = document.getElementById('panel-title'); 
         const infoContentWrapper = document.getElementById('info-content-wrapper'); 
         const infoContent = document.getElementById('info-content');
-        const lessonViewTitle = document.getElementById('lesson-view-title');
-        const lessonViewImage = document.getElementById('lesson-view-image');
-        const lessonViewDialoguePrompt = document.getElementById('lesson-view-dialogue-prompt');
-        const lessonViewLearningFocus = document.getElementById('lesson-view-learning-focus');
-        const lessonViewKeyPhrases = document.getElementById('lesson-view-key-phrases');
-        const lessonBackButton = document.getElementById('lesson-back-button');
-        const finishLessonButton = document.getElementById('finish-lesson-button');
-
         const closePanelBtn = document.getElementById('close-panel-btn');
         const prevLocationBtn = document.getElementById('prev-location-btn');
         const nextLocationBtn = document.getElementById('next-location-btn');
@@ -531,17 +477,6 @@
             nextLocationBtn.disabled = currentLocationIndex >= activeStoryLessons.length - 1;
             currentLocationIndicator.textContent = `${currentLocationIndex + 1} / ${activeStoryLessons.length}`;
         }
-        
-        function populateLessonViewPage(scenario) {
-            lessonViewTitle.textContent = scenario.scenarioTitle;
-            lessonViewImage.src = scenario.imageUrl;
-            lessonViewImage.alt = scenario.scenarioTitle;
-            lessonViewImage.className = (scenario.status === 'locked' || scenario.status === 'current') ? 'scenario-image grayscale' : 'scenario-image';
-            lessonViewDialoguePrompt.textContent = scenario.dialoguePrompt;
-            lessonViewLearningFocus.textContent = scenario.learningFocus;
-            lessonViewKeyPhrases.innerHTML = scenario.keyPhrases.map(phrase => `<li>${phrase}</li>`).join('');
-        }
-
 
         function displayLocationDetails(indexToShow) {
             if (!activeStoryLessons || indexToShow < 0 || indexToShow >= activeStoryLessons.length) return;
@@ -585,8 +520,25 @@
                 startButton.addEventListener('click', () => {
                     console.log(`Starting lesson: ${scenario.scenarioTitle}`);
                     if (scenario.status === 'current') {
-                        populateLessonViewPage(scenario);
-                        switchPage('lesson-view-page');
+                        scenario.status = 'completed';
+                        scenario.performance = 'bronze'; 
+                        markers[currentLocationIndex].setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
+                        
+                        const newStatusIndicatorHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
+                        const indicatorDiv = infoContent.querySelector('.status-indicator-container');
+                        if (indicatorDiv) indicatorDiv.innerHTML = newStatusIndicatorHTML.match(/<div class="status-indicator-container">(.*)<\/div>/)[1];
+
+                        const nextScenarioIndex = currentLocationIndex + 1;
+                        if (nextScenarioIndex < activeStoryLessons.length && activeStoryLessons[nextScenarioIndex].status === 'locked') {
+                            activeStoryLessons[nextScenarioIndex].status = 'current';
+                             markers[nextScenarioIndex].setIcon(createLocationIcon(nextScenarioIndex + 1, false, 'current', null));
+                        }
+                        updateNavigationControls(); 
+                        if (nextScenarioIndex < activeStoryLessons.length) {
+                            setTimeout(() => displayLocationDetails(nextScenarioIndex), 500);
+                        } else { 
+                            collapseInfoPanel();
+                        }
                     }
                 });
             }
@@ -682,7 +634,7 @@
             if (initialIndexForStory === -1 && activeStoryLessons.length > 0) {
                 initialIndexForStory = 0; 
                 activeStoryLessons[0].status = 'current'; 
-                 if(markers[0]) markers[0].setIcon(createLocationIcon(1, false, 'current', null)); 
+                 markers[0].setIcon(createLocationIcon(1, false, 'current', null)); 
             }
             currentLocationIndex = initialIndexForStory !== -1 ? initialIndexForStory : -1;
 
@@ -700,7 +652,7 @@
 
             if (selectedMarker) {
                 const prevMarkerIndex = markers.indexOf(selectedMarker);
-                if (prevMarkerIndex !== -1 && activeStoryLessons[prevMarkerIndex]) { // Corrected typo here
+                if (prevMarkerIndex !== -1 && activeStoryLessons[prevMarkerIndex]) {
                     const prevScenario = activeStoryLessons[prevMarkerIndex];
                     markers[prevMarkerIndex].setIcon(createLocationIcon(prevMarkerIndex + 1, false, prevScenario.status, prevScenario.performance));
                 }
@@ -727,7 +679,7 @@
         const navItems = document.querySelectorAll('.nav-item');
         const pages = document.querySelectorAll('.page');
         let mapPageFirstLoad = true;
-        const mapNavItem = document.querySelector('.nav-item[data-page="map-page-content"]'); 
+        const mapNavItem = document.querySelector('.nav-item[data-page="map-page-content"]'); // Get map nav item
 
 
         function switchPage(pageId) {
@@ -786,7 +738,7 @@
                     console.log(`Story selected: ${story.title}`);
                     activeStoryLessons = story.lessons || [];
                     mapPageFirstLoad = true; 
-                    if (mapNavItem) mapNavItem.classList.remove('nav-item-disabled'); 
+                    if (mapNavItem) mapNavItem.classList.remove('nav-item-disabled'); // Enable map nav item
                     switchPage('map-page-content');
                 });
                 gridContainer.appendChild(card);
@@ -794,13 +746,13 @@
         }
 
         navItems.forEach(item => item.addEventListener('click', () => {
-            if (item.classList.contains('nav-item-disabled')) return; 
+            if (item.classList.contains('nav-item-disabled')) return; // Prevent click if disabled
             switchPage(item.dataset.page);
         }));
         
         switchPage('stories-page-content'); 
         renderStoryCards(); 
-        if (mapNavItem) mapNavItem.classList.add('nav-item-disabled'); 
+        if (mapNavItem) mapNavItem.classList.add('nav-item-disabled'); // Disable map nav item initially
 
 
         closePanelBtn.addEventListener('click', (e) => {
@@ -825,53 +777,6 @@
         
         L.DomEvent.disableClickPropagation(infoPanel);
         window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
-
-        // Lesson View Page Button Listeners
-        lessonBackButton.addEventListener('click', () => {
-            switchPage('map-page-content');
-            if (currentLocationIndex !== -1) {
-                infoPanel.classList.remove('hidden-fully');
-                setTimeout(() => displayLocationDetails(currentLocationIndex),0); 
-            }
-        });
-
-        finishLessonButton.addEventListener('click', () => {
-            if (currentLocationIndex === -1 || !activeStoryLessons[currentLocationIndex]) return;
-            
-            const scenario = activeStoryLessons[currentLocationIndex];
-            console.log(`Finishing lesson: ${scenario.scenarioTitle}`);
-            
-            scenario.status = 'completed';
-            scenario.performance = scenario.performance || 'bronze'; 
-            
-            if (markers[currentLocationIndex]) {
-                markers[currentLocationIndex].setIcon(createLocationIcon(currentLocationIndex + 1, false, scenario.status, scenario.performance));
-            }
-            
-            const currentStoryForProgress = storyData.find(story => story.lessons === activeStoryLessons);
-            if (currentStoryForProgress) {
-                currentStoryForProgress.episodesCompleted = activeStoryLessons.filter(l => l.status === 'completed').length;
-                renderStoryCards(); 
-            }
-
-            const nextScenarioIndex = currentLocationIndex + 1;
-            if (nextScenarioIndex < activeStoryLessons.length) {
-                if (activeStoryLessons[nextScenarioIndex].status === 'locked') {
-                    activeStoryLessons[nextScenarioIndex].status = 'current';
-                    if(markers[nextScenarioIndex]) markers[nextScenarioIndex].setIcon(createLocationIcon(nextScenarioIndex + 1, false, 'current', null));
-                }
-                switchPage('map-page-content');
-                setTimeout(() => displayLocationDetails(nextScenarioIndex), 100); 
-            } else {
-                switchPage('map-page-content');
-                 setTimeout(() => {
-                    currentLocationIndex = -1; 
-                    collapseInfoPanel();
-                    if (latLngs.length > 0) map.fitBounds(L.latLngBounds(latLngs).pad(0.05));
-                },100);
-            }
-            updateNavigationControls();
-        });
 
     </script>
 </body>
