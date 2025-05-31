@@ -54,7 +54,7 @@
             overflow: hidden;
             padding-bottom: 0; /* Map page doesn't need this padding, its content is fixed height */
         }
-      
+     
         /* Stories Page Specific Styles */
         #stories-page-content {
             /* overflow-y: auto; already on .page */
@@ -126,7 +126,7 @@
             transition: width 0.5s ease-in-out;
         }
 
-        #lessons-page-content .content-padding,
+        #lessons-page-content .content-padding, /* Kept for potential future use */
         #profile-page-content .content-padding {
              padding: 2rem; 
         }
@@ -155,10 +155,10 @@
             height: 60vh; 
             transform: translateY(100%);  
             transition: transform 0.3s ease-in-out, height 0.3s ease-in-out;
-            z-index: 1000;
+            z-index: 1000; /* Ensure info panel is above map markers default pane */
         }
         #info-panel.expanded { transform: translateY(0); height: 60vh; }
-        #info-panel.collapsed { transform: translateY(0); height: 80px; }
+        #info-panel.collapsed { transform: translateY(0); height: 80px; } 
         #info-panel.hidden-fully { transform: translateY(100%); }
         #info-panel.collapsed #info-content-wrapper,
         #info-panel.collapsed #info-panel-navigation { display: none; }
@@ -169,12 +169,12 @@
             border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: width 0.15s ease-in-out, height 0.15s ease-in-out, line-height 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
-        .custom-marker-icon.status-locked-upcoming { background-color: #3B82F6; }
-        .custom-marker-icon.status-current { background-color: #10B981; animation: pulse-current 2s infinite; }
-        .custom-marker-icon.status-completed-base { background-color: #047857; }
-        .custom-marker-icon.status-completed-bronze { background-color: #D97706; }
-        .custom-marker-icon.status-completed-silver { background-color: #94A3B8; }
-        .custom-marker-icon.status-completed-gold { background-color: #FACC15; color: #422006; }
+        .custom-marker-icon.status-locked-upcoming { background-color: #3B82F6; } 
+        .custom-marker-icon.status-current { background-color: #10B981; animation: pulse-current 2s infinite; } 
+        .custom-marker-icon.status-completed-base { background-color: #047857; } 
+        .custom-marker-icon.status-completed-bronze { background-color: #D97706; } 
+        .custom-marker-icon.status-completed-silver { background-color: #94A3B8; } 
+        .custom-marker-icon.status-completed-gold { background-color: #FACC15; color: #422006; } 
         
         @keyframes pulse-current {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7), 0 2px 5px rgba(0,0,0,0.3); }
@@ -187,10 +187,10 @@
             padding: 0.75rem 1.5rem; border-bottom: 1px solid #e5e7eb;
             flex-shrink: 0; cursor: pointer; 
         }
-        #panel-title { min-width: 0; }
+        #panel-title { min-width: 0; } 
         #close-panel-btn { padding: 0.25rem; }
         #drag-handle {
-            width: 40px; height: 4px; background-color: #D1D5DB;
+            width: 40px; height: 4px; background-color: #D1D5DB; 
             border-radius: 2px; margin: 0.5rem auto 0.25rem; flex-shrink: 0;
             cursor: pointer; 
         }
@@ -199,7 +199,7 @@
             padding: 0.5rem 1.5rem; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; 
         }
         #info-panel-navigation button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #info-panel-navigation button:disabled svg { color: #9CA3AF; }
+        #info-panel-navigation button:disabled svg { color: #9CA3AF; } 
 
         #info-content-wrapper {
             flex-grow: 1; overflow-y: auto; padding: 0 1.5rem 1.5rem;
@@ -210,13 +210,13 @@
         }
         #info-content img.grayscale { filter: grayscale(100%); }
         .key-phrases-title {
-            font-weight: 600; color: #374151; margin-top: 0.75rem; margin-bottom: 0.25rem;
+            font-weight: 600; color: #374151; margin-top: 0.75rem; margin-bottom: 0.25rem; 
         }
         .key-phrases-list {
             list-style-type: disc; margin-left: 1.25rem; font-size: 0.875rem; color: #4B5563; 
         }
         .scenario-description {
-            font-size: 0.875rem; color: #4B5563; margin-top: 0.5rem; line-height: 1.6;
+            font-size: 0.875rem; color: #4B5563; margin-top: 0.5rem; line-height: 1.6; 
         }
         
         .status-indicator-container {
@@ -227,9 +227,9 @@
             width: 1.75rem; height: 1.75rem; margin-right: 0.25rem; 
         }
         .status-indicator-container svg:last-child { margin-right: 0; }
-        .star-filled { color: #FACC15; }
-        .star-empty { color: #D1D5DB; }
-        .lock-icon { color: #6B7280; width: 2rem !important; height: 2rem !important; }
+        .star-filled { color: #FACC15; } 
+        .star-empty { color: #D1D5DB; } 
+        .lock-icon { color: #6B7280; width: 2rem !important; height: 2rem !important; } 
 
         .start-lesson-button {
             background-color: #10B981; color: white; font-weight: 600; 
@@ -237,30 +237,30 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
             transition: background-color 0.2s ease-in-out;
         }
-        .start-lesson-button:hover { background-color: #059669; }
+        .start-lesson-button:hover { background-color: #059669; } 
 
         #bottom-nav {
             width: 100%; height: 60px; background-color: white;
             border-top: 1px solid #e5e7eb; display: flex;
             justify-content: space-around; align-items: center;
             position: fixed; bottom: 0; left: 0;
-            z-index: 1100; flex-shrink: 0;
+            z-index: 1100; flex-shrink: 0; /* Ensure nav is above info panel */
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; flex-grow: 1; padding: 0.5rem 0;
-            font-size: 0.75rem; color: #6B7280; cursor: pointer;
+            font-size: 0.75rem; color: #6B7280; cursor: pointer; 
             transition: color 0.2s ease-in-out;
         }
-        .nav-item:hover { color: #10B981; }
-        .nav-item.active-nav-item { color: #10B981; font-weight: 600; }
-        .nav-item.nav-item-disabled { /* New style for disabled nav items */
-            color: #D1D5DB; /* Tailwind gray-300 */
+        .nav-item:hover { color: #10B981; } 
+        .nav-item.active-nav-item { color: #10B981; font-weight: 600; } 
+        .nav-item.nav-item-disabled { 
+            color: #D1D5DB; 
             cursor: not-allowed;
-            pointer-events: none; /* Prevents click */
+            pointer-events: none; 
         }
         .nav-item.nav-item-disabled:hover {
-            color: #D1D5DB; /* Keep it gray on hover */
+            color: #D1D5DB; 
         }
         .nav-item svg { width: 1.5rem; height: 1.5rem; margin-bottom: 0.25rem; }
 
@@ -273,13 +273,13 @@
         <div id="stories-page-content" class="page active-page">
             <div class="stories-grid" id="stories-grid-container">
                 </div>
-            </div>
+        </div>
 
         <div id="map-page-content" class="page">
             <div id="map-container">
-                <div id="map"></div>
-            </div>
+                <div id="map"></div> </div>
         </div>
+
         <div id="profile-page-content" class="page">
             <div class="content-padding">
                 <h1 class="text-2xl font-bold text-gray-800">User Profile</h1>
@@ -289,8 +289,7 @@
     </div>
 
     <div id="info-panel"> 
-        <div id="drag-handle"></div>
-        <div id="info-panel-header">
+        <div id="drag-handle"></div> <div id="info-panel-header">
             <h2 id="panel-title" class="text-xl font-bold text-gray-800 truncate">Scenario Details</h2>
             <button id="close-panel-btn" class="text-gray-500 hover:text-gray-700">
                 </button>
@@ -326,7 +325,7 @@
 
 
     <script>
-        // Define Alexa's lessons (North to Central) - 10 Episodes
+        // --- Story and Lesson Data ---
         const alexaStoryLessons = [
             { id: 'alexa_ep1', coords: [21.2212, 105.8040], scenarioTitle: "Airport Arrival & Taxi", learningFocus: "Customs, taxi, directions.", keyPhrases: ["Xin chào", "Taxi ở đâu?", "Đến khách sạn này.", "Bao nhiêu tiền?"], dialoguePrompt: "Navigate immigration and find a taxi.", imageUrl: "https://placehold.co/600x400/87CEEB/FFF?text=Noi+Bai+Airport", status: 'current', performance: null },
             { id: 'alexa_ep2', coords: [21.0338, 105.8522], scenarioTitle: "First Bowl of Phở", learningFocus: "Ordering food, menu items.", keyPhrases: ["Cho tôi một bát phở bò.", "Không hành.", "Ngon quá!", "Tính tiền."], dialoguePrompt: "Order Phở at a street stall.", imageUrl: "https://placehold.co/600x400/FFD700/000?text=Hanoi+Pho", status: 'locked', performance: null },
@@ -339,7 +338,6 @@
             { id: 'alexa_ep9', coords: [15.8780, 108.3300], scenarioTitle: "Cooking Class in Hoi An", learningFocus: "Ingredients, cooking steps.", keyPhrases: ["Học nấu ăn.", "Món này làm thế nào?", "Thêm gia vị."], dialoguePrompt: "Participate in a Hoi An cooking class.", imageUrl: "https://placehold.co/600x400/9ACD32/000?text=Hoi+An+Cooking", status: 'locked', performance: null },
             { id: 'alexa_ep10', coords: [15.9110, 108.3648], scenarioTitle: "Beach Relaxation (An Bang)", learningFocus: "Ordering drinks, beach talk.", keyPhrases: ["Cho tôi một quả dừa.", "Biển có sóng không?", "Nước có ấm không?"], dialoguePrompt: "Relax at An Bang beach.", imageUrl: "https://placehold.co/600x400/ADD8E6/000?text=An+Bang+Beach", status: 'locked', performance: null }
         ];
-
         const brianStoryLessons = [
             { id: 'brian_ep1', coords: [10.0370, 105.7882], scenarioTitle: "Dinner with In-Laws (Can Tho)", learningFocus: "Table manners, family vocab.", keyPhrases: ["Mời cả nhà ăn cơm.", "Món này ngon quá!", "Để con giúp."], dialoguePrompt: "Compliment food with in-laws.", imageUrl: "https://placehold.co/600x400/90EE90/000?text=Family+Dinner", status: 'current', performance: null },
             { id: 'brian_ep2', coords: [10.2380, 106.3760], scenarioTitle: "Orchard Visit (Ben Tre)", learningFocus: "Fruits, farming.", keyPhrases: ["Trái cây này là gì?", "Vườn rộng quá!", "Hái thử được không?"], dialoguePrompt: "Ask about fruits in an orchard.", imageUrl: "https://placehold.co/600x400/FFB6C1/000?text=Ben+Tre+Orchard", status: 'locked', performance: null },
@@ -352,7 +350,6 @@
             { id: 'brian_ep9', coords: [10.0300, 105.7800], scenarioTitle: "Family Anniversary Party (Can Tho)", learningFocus: "Celebrations, giving wishes.", keyPhrases: ["Chúc mừng kỷ niệm!", "Chúc gia đình hạnh phúc.", "Mọi người thật vui vẻ."], dialoguePrompt: "Offer congratulations at a party.", imageUrl: "https://placehold.co/600x400/FFDAB9/000?text=Family+Party", status: 'locked', performance: null },
             { id: 'brian_ep10', coords: [9.9000, 105.7500], scenarioTitle: "A Quiet Evening by the River", learningFocus: "Relaxed conversation, nature.", keyPhrases: ["Buổi tối yên bình.", "Sông Hậu đẹp quá.", "Ngắm trăng."], dialoguePrompt: "Enjoy a peaceful evening chat.", imageUrl: "https://placehold.co/600x400/E0FFFF/000?text=Mekong+Evening", status: 'locked', performance: null }
         ];
-
         const christineStoryLessons = [
             { id: 'christine_ep1', coords: [16.0545, 108.2208], scenarioTitle: "Business Meeting (Da Nang)", learningFocus: "Formal intros, business cards.", keyPhrases: ["Rất vui được gặp anh/chị.", "Đây là danh thiếp của tôi.", "Thảo luận về dự án."], dialoguePrompt: "Introduce yourself formally.", imageUrl: "https://placehold.co/600x400/B0E0E6/000?text=Da+Nang+Meeting", status: 'current', performance: null },
             { id: 'christine_ep2', coords: [15.7731, 108.2905], scenarioTitle: "Historical Research (My Son)", learningFocus: "Detailed history, architecture.", keyPhrases: ["Di tích này bao nhiêu tuổi?", "Kiến trúc này ý nghĩa gì?", "Nghiên cứu văn hóa Chăm."], dialoguePrompt: "Ask about Cham architecture.", imageUrl: "https://placehold.co/600x400/FFE4B5/000?text=My+Son+Research", status: 'locked', performance: null },
@@ -365,7 +362,6 @@
             { id: 'christine_ep9', coords: [10.8231, 106.6297], scenarioTitle: "Factory Visit (HCMC Outskirts)", learningFocus: "Production process, quality control.", keyPhrases: ["Tham quan nhà máy.", "Quy trình sản xuất.", "Kiểm tra chất lượng."], dialoguePrompt: "Ask about factory production.", imageUrl: "https://placehold.co/600x400/DCDCDC/000?text=Factory+Visit", status: 'locked', performance: null },
             { id: 'christine_ep10', coords: [16.0700, 108.2200], scenarioTitle: "Contract Finalization (Da Nang)", learningFocus: "Legal terms, signing.", keyPhrases: ["Xem lại hợp đồng.", "Điều khoản thanh toán.", "Ký kết thỏa thuận."], dialoguePrompt: "Discuss final contract terms.", imageUrl: "https://placehold.co/600x400/ADD8E6/000?text=Contract+Signing", status: 'locked', performance: null }
         ];
-        
         const davidStoryLessons = [
             { id: 'david_ep1', coords: [21.0060, 105.8430], scenarioTitle: "Uni Campus Life (Hanoi)", learningFocus: "Student life, classes, plans.", keyPhrases: ["Bạn học ngành gì?", "Lớp này khó không?", "Tối nay đi chơi?"], dialoguePrompt: "Chat with a classmate.", imageUrl: "https://placehold.co/600x400/FFC0CB/000?text=Hanoi+Uni", status: 'current', performance: null },
             { id: 'david_ep2', coords: [23.0663, 105.2832], scenarioTitle: "Planning Ha Giang Loop", learningFocus: "Routes, safety, guesthouses.", keyPhrases: ["Đi đường nào?", "Có nguy hiểm không?", "Đặt phòng nhà nghỉ."], dialoguePrompt: "Plan Ha Giang Loop with friends.", imageUrl: "https://placehold.co/600x400/87CEFA/000?text=Ha+Giang+Plan", status: 'locked', performance: null },
@@ -378,7 +374,6 @@
             { id: 'david_ep9', coords: [20.9700, 105.9000], scenarioTitle: "Pottery Village (Bat Trang)", learningFocus: "Traditional crafts, techniques.", keyPhrases: ["Làng gốm Bát Tràng.", "Thử nặn gốm.", "Hoa văn này ý nghĩa gì?"], dialoguePrompt: "Try making pottery.", imageUrl: "https://placehold.co/600x400/A52A2A/FFF?text=Bat+Trang+Pottery", status: 'locked', performance: null },
             { id: 'david_ep10', coords: [21.0280, 105.8500], scenarioTitle: "Farewell Party (Hanoi)", learningFocus: "Saying goodbye, future plans.", keyPhrases: ["Tạm biệt các bạn.", "Hẹn gặp lại.", "Chúc may mắn!"], dialoguePrompt: "Say farewell to friends.", imageUrl: "https://placehold.co/600x400/FF69B4/FFF?text=Hanoi+Farewell", status: 'locked', performance: null }
         ];
-
         const storyData = [
             { id: 'story1', title: 'Alexa', subtitle: 'Tourist story', episodesCompleted: 5, totalEpisodes: alexaStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/7DD3FC/FFF?text=Story+Alexa', lessons: alexaStoryLessons },
             { id: 'story2', title: 'Brian', subtitle: 'Married by Vietnamese', episodesCompleted: 8, totalEpisodes: brianStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/FDBA74/FFF?text=Story+Brian', lessons: brianStoryLessons }, 
@@ -386,13 +381,14 @@
             { id: 'story4', title: 'David', subtitle: 'Student', episodesCompleted: 7, totalEpisodes: davidStoryLessons.length, backgroundImageUrl: 'https://placehold.co/300x400/A5B4FC/FFF?text=Story+David', lessons: davidStoryLessons },
         ];
 
+        // --- Global Variables & DOM Element References ---
         let map; 
         const infoPanel = document.getElementById('info-panel');
         const panelHeader = document.getElementById('info-panel-header'); 
         const dragHandle = document.getElementById('drag-handle'); 
         const panelTitleElement = document.getElementById('panel-title'); 
         const infoContentWrapper = document.getElementById('info-content-wrapper'); 
-        const infoContent = document.getElementById('info-content');
+        const infoContent = document.getElementById('info-content'); 
         const closePanelBtn = document.getElementById('close-panel-btn');
         const prevLocationBtn = document.getElementById('prev-location-btn');
         const nextLocationBtn = document.getElementById('next-location-btn');
@@ -400,10 +396,14 @@
 
         let markers = []; 
         let latLngs = []; 
-        let selectedMarker = null;
+        let selectedMarker = null; 
         let currentLocationIndex = -1; 
         let activeStoryLessons = []; 
         let mapMarkersLayerGroup = null; 
+
+        const Z_INDEX_CURRENT = 1000;
+        const Z_INDEX_COMPLETED = 500;
+        const Z_INDEX_LOCKED = 0;
 
         const starFilledSVG = `<svg class="star-filled" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
         const starEmptySVG = `<svg class="star-empty" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4zm0-6a6 6 0 100 12 6 6 0 000-12zm0 1a8 8 0 100 16A8 8 0 0010 2z" clip-rule="evenodd"></path></svg>`;
@@ -411,15 +411,16 @@
         const chevronDownSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
         const chevronUpSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>`;
 
+        // --- Map & Marker Functions ---
         function createLocationIcon(number, isSelected = false, status = 'locked', performance = null) {
             const size = isSelected ? 40 : 30;
-            const anchor = isSelected ? [20, 40] : [15, 30];
+            const anchor = isSelected ? [20, 40] : [15, 30]; 
             let iconHtml = '';
             let statusClassName = '';
-            let baseFontSize = '12px'; 
-            let selectedFontSize = '16px';
-            let checkmarkBaseFontSize = '16px';
-            let checkmarkSelectedFontSize = '20px';
+            const baseFontSize = '12px'; 
+            const selectedFontSize = '16px';
+            const checkmarkBaseFontSize = '16px';
+            const checkmarkSelectedFontSize = '20px';
 
             switch (status) {
                 case 'locked':
@@ -441,7 +442,13 @@
                     iconHtml = `<span style="font-size: ${isSelected ? selectedFontSize : baseFontSize}; line-height: ${size}px;">${number}</span>`;
                     break;
             }
-            return L.divIcon({ className: `custom-marker-icon ${statusClassName}`, html: iconHtml, iconSize: [size, size], iconAnchor: anchor, popupAnchor: [0, -(size - 2)] });
+            return L.divIcon({ 
+                className: `custom-marker-icon ${statusClassName}`, 
+                html: iconHtml, 
+                iconSize: [size, size], 
+                iconAnchor: anchor, 
+                popupAnchor: [0, -(size - 2)] 
+            });
         }
         
         function getStatusIndicatorHTML(status, performance) {
@@ -466,6 +473,7 @@
             return indicatorHTML;
         }
 
+        // --- Info Panel Functions ---
         function updateNavigationControls() {
             if (currentLocationIndex === -1 || activeStoryLessons.length === 0) {
                 prevLocationBtn.disabled = true;
@@ -482,29 +490,35 @@
             if (!activeStoryLessons || indexToShow < 0 || indexToShow >= activeStoryLessons.length) return;
 
             if (selectedMarker) {
-                 const prevMarkerArrayIndex = markers.indexOf(selectedMarker);
-                 if (prevMarkerArrayIndex !== -1 && activeStoryLessons[prevMarkerArrayIndex]) { 
+                const prevMarkerArrayIndex = markers.indexOf(selectedMarker);
+                if (prevMarkerArrayIndex !== -1 && activeStoryLessons[prevMarkerArrayIndex]) { 
                     const prevScenario = activeStoryLessons[prevMarkerArrayIndex];
                     markers[prevMarkerArrayIndex].setIcon(createLocationIcon(prevMarkerArrayIndex + 1, false, prevScenario.status, prevScenario.performance));
-                 }
+                    // zIndexOffset for prevScenario is already set based on its status, no change needed on deselection unless its status also changed.
+                }
             }
             
             currentLocationIndex = indexToShow;
             const scenario = activeStoryLessons[currentLocationIndex];
             const currentMapMarker = markers[currentLocationIndex];
 
-            if (!scenario || !currentMapMarker) return; 
+            if (!scenario || !currentMapMarker) {
+                console.error("Scenario or marker not found for index:", indexToShow);
+                return; 
+            }
 
             currentMapMarker.setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
             selectedMarker = currentMapMarker;
+            // The zIndexOffset of currentMapMarker is determined by its 'scenario.status' and was set
+            // during creation or when its status last changed. This ensures 'current' is on top.
 
             panelTitleElement.textContent = scenario.scenarioTitle; 
-            let phrasesHTML = scenario.keyPhrases.map(phrase => `<li>${phrase}</li>`).join('');
+            const phrasesHTML = scenario.keyPhrases.map(phrase => `<li>${phrase}</li>`).join('');
             const statusIndicatorHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
             const imageGrayscaleClass = (scenario.status === 'locked' || scenario.status === 'current') ? 'grayscale' : '';
 
             infoContent.innerHTML = `
-                <img src="${scenario.imageUrl}" alt="${scenario.scenarioTitle}" class="w-full object-cover rounded-lg shadow ${imageGrayscaleClass}" onerror="this.src='https://placehold.co/600x400/CCCCCC/FFF?text=Scenario+Image'; this.onerror=null;">
+                <img src="${scenario.imageUrl}" alt="${scenario.scenarioTitle}" class="w-full object-cover rounded-lg shadow ${imageGrayscaleClass}" onerror="this.src='https://placehold.co/600x400/CCCCCC/FFF?text=Image+Error'; this.onerror=null;">
                 ${statusIndicatorHTML} 
                 <h3 class="key-phrases-title">Learning Focus:</h3>
                 <p class="scenario-description">${scenario.learningFocus}</p>
@@ -515,34 +529,6 @@
             `;
             infoContentWrapper.style.display = 'block'; 
 
-            const startButton = document.getElementById('start-lesson-action-button');
-            if (startButton) {
-                startButton.addEventListener('click', () => {
-                    console.log(`Starting lesson: ${scenario.scenarioTitle}`);
-                    if (scenario.status === 'current') {
-                        scenario.status = 'completed';
-                        scenario.performance = 'bronze'; 
-                        markers[currentLocationIndex].setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
-                        
-                        const newStatusIndicatorHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
-                        const indicatorDiv = infoContent.querySelector('.status-indicator-container');
-                        if (indicatorDiv) indicatorDiv.innerHTML = newStatusIndicatorHTML.match(/<div class="status-indicator-container">(.*)<\/div>/)[1];
-
-                        const nextScenarioIndex = currentLocationIndex + 1;
-                        if (nextScenarioIndex < activeStoryLessons.length && activeStoryLessons[nextScenarioIndex].status === 'locked') {
-                            activeStoryLessons[nextScenarioIndex].status = 'current';
-                             markers[nextScenarioIndex].setIcon(createLocationIcon(nextScenarioIndex + 1, false, 'current', null));
-                        }
-                        updateNavigationControls(); 
-                        if (nextScenarioIndex < activeStoryLessons.length) {
-                            setTimeout(() => displayLocationDetails(nextScenarioIndex), 500);
-                        } else { 
-                            collapseInfoPanel();
-                        }
-                    }
-                });
-            }
-            
             const panelWasHiddenOrCollapsed = !infoPanel.classList.contains('expanded') || infoPanel.style.transform === 'translateY(100%)';
             
             infoPanel.classList.remove('hidden-fully', 'collapsed'); 
@@ -556,11 +542,11 @@
                     infoPanel.removeEventListener('transitionend', panelExpansionHandler); 
                     const targetZoom = 11; 
                     const panelHeightForOffset = window.innerHeight * 0.60; 
-                    const yOffset = panelHeightForOffset / 2;
-                    const projectedLocation = map.project(scenario.coords, targetZoom);
-                    const projectedCenter = L.point(projectedLocation.x, projectedLocation.y + yOffset);
-                    const targetLatLng = map.unproject(projectedCenter, targetZoom);
-                    map.flyTo(targetLatLng, targetZoom, { duration: 5.0 });
+                    const yOffsetPixels = panelHeightForOffset / 2; 
+                    const projectedLocation = map.project(scenario.coords, targetZoom); 
+                    const targetMapCenterProjected = L.point(projectedLocation.x, projectedLocation.y - yOffsetPixels);
+                    const targetLatLng = map.unproject(targetMapCenterProjected, targetZoom);
+                    map.flyTo(targetLatLng, targetZoom, { duration: 0.7 }); 
                 }
             };
             
@@ -569,37 +555,36 @@
             } else { 
                 const targetZoom = 11;
                 const panelHeightForOffset = window.innerHeight * 0.60;
-                const yOffset = panelHeightForOffset / 2;
+                const yOffsetPixels = panelHeightForOffset / 2;
                 const projectedLocation = map.project(scenario.coords, targetZoom);
-                const projectedCenter = L.point(projectedLocation.x, projectedLocation.y + yOffset);
-                const targetLatLng = map.unproject(projectedCenter, targetZoom);
-                map.flyTo(targetLatLng, targetZoom, { duration: 5.0 });
+                const targetMapCenterProjected = L.point(projectedLocation.x, projectedLocation.y - yOffsetPixels);
+                const targetLatLng = map.unproject(targetMapCenterProjected, targetZoom);
+                map.flyTo(targetLatLng, targetZoom, { duration: 0.7 });
             }
         }
         
         function setupMapInstance() { 
             if (!map) { 
-                map = L.map('map', { zoomControl: false }).setView([16.0, 108.0], 5);
+                map = L.map('map', { zoomControl: false }).setView([16.0, 108.0], 5); 
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                     subdomains: 'abcd', maxZoom: 19 
                 }).addTo(map);
                 L.control.zoom({ position: 'topright' }).addTo(map);
-                mapMarkersLayerGroup = L.layerGroup().addTo(map);
+                mapMarkersLayerGroup = L.layerGroup().addTo(map); 
+
                 map.on('click', () => { 
                     if (map && infoPanel.classList.contains('expanded')) { 
                         collapseInfoPanel();
                     }
                 });
-                mapInitialized = true;
             }
         }
 
         function loadStoryOnMap() {
             setupMapInstance(); 
-
             mapMarkersLayerGroup.clearLayers(); 
-            markers.length = 0;
+            markers.length = 0; 
             latLngs.length = 0;
             selectedMarker = null; 
 
@@ -607,7 +592,7 @@
                 console.warn("No active learning scenarios for this story.");
                 map.setView([16.0, 108.0], 5); 
                 currentLocationIndex = -1;
-                collapseInfoPanel(); 
+                collapseInfoPanel(true); 
                 updateNavigationControls();
                 panelTitleElement.textContent = "Scenario Details";
                 infoContent.innerHTML = `<p class="text-gray-600">No lessons in this story yet. Choose another story!</p>`;
@@ -615,9 +600,19 @@
             }
 
             activeStoryLessons.forEach((scenario, index) => {
-                const marker = L.marker(scenario.coords, { icon: createLocationIcon(index + 1, false, scenario.status, scenario.performance) })
+                let zOffset = Z_INDEX_LOCKED; // Default for locked
+                if (scenario.status === 'current') {
+                    zOffset = Z_INDEX_CURRENT;
+                } else if (scenario.status === 'completed') {
+                    zOffset = Z_INDEX_COMPLETED;
+                }
+
+                const marker = L.marker(scenario.coords, { 
+                    icon: createLocationIcon(index + 1, false, scenario.status, scenario.performance),
+                    zIndexOffset: zOffset // Assign zIndexOffset at creation
+                })
                     .on('click', (e) => {
-                        L.DomEvent.stopPropagation(e);
+                        L.DomEvent.stopPropagation(e); 
                         displayLocationDetails(index);
                     });
                 markers.push(marker);
@@ -633,8 +628,11 @@
             let initialIndexForStory = activeStoryLessons.findIndex(s => s.status === 'current');
             if (initialIndexForStory === -1 && activeStoryLessons.length > 0) {
                 initialIndexForStory = 0; 
-                activeStoryLessons[0].status = 'current'; 
-                 markers[0].setIcon(createLocationIcon(1, false, 'current', null)); 
+                if(activeStoryLessons[0].status === 'locked') { 
+                    activeStoryLessons[0].status = 'current'; 
+                    markers[0].setIcon(createLocationIcon(1, false, 'current', null)); 
+                    markers[0].setZIndexOffset(Z_INDEX_CURRENT); // Update zIndex if status changed
+                }
             }
             currentLocationIndex = initialIndexForStory !== -1 ? initialIndexForStory : -1;
 
@@ -642,13 +640,18 @@
             updateNavigationControls();
         }
 
-
-        function collapseInfoPanel() { 
+        function collapseInfoPanel(hideFully = false) { 
             infoPanel.style.transform = ''; 
-            infoPanel.classList.remove('expanded', 'hidden-fully');
-            infoPanel.classList.add('collapsed');
-            infoContentWrapper.style.display = 'none';
-            closePanelBtn.innerHTML = chevronUpSVG; 
+            infoPanel.classList.remove('expanded');
+            if (hideFully) {
+                infoPanel.classList.remove('collapsed');
+                infoPanel.classList.add('hidden-fully');
+            } else {
+                infoPanel.classList.remove('hidden-fully');
+                infoPanel.classList.add('collapsed');
+                infoContentWrapper.style.display = 'none'; 
+                closePanelBtn.innerHTML = chevronUpSVG; 
+            }
 
             if (selectedMarker) {
                 const prevMarkerIndex = markers.indexOf(selectedMarker);
@@ -666,25 +669,28 @@
                 displayLocationDetails(currentLocationIndex); 
             } else if ((infoPanel.classList.contains('hidden-fully') || !infoPanel.classList.contains('expanded')) && currentLocationIndex === -1 && activeStoryLessons.length > 0) {
                 let initialIndexToOpen = activeStoryLessons.findIndex(s => s.status === 'current');
-                if (initialIndexToOpen === -1 && activeStoryLessons.length > 0) initialIndexToOpen = 0; 
+                if (initialIndexToOpen === -1) initialIndexToOpen = 0; 
                 if (initialIndexToOpen !== -1) displayLocationDetails(initialIndexToOpen);
             } else if (infoPanel.classList.contains('hidden-fully')) { 
-                 infoPanel.classList.remove('hidden-fully','expanded');
-                 infoPanel.classList.add('collapsed');
-                 infoContentWrapper.style.display = 'none';
-                 closePanelBtn.innerHTML = chevronUpSVG;
+                infoPanel.classList.remove('hidden-fully','expanded');
+                infoPanel.classList.add('collapsed');
+                infoContentWrapper.style.display = 'none';
+                closePanelBtn.innerHTML = chevronUpSVG;
             }
         }
         
+        // --- Page Navigation & UI Setup ---
         const navItems = document.querySelectorAll('.nav-item');
         const pages = document.querySelectorAll('.page');
-        let mapPageFirstLoad = true;
-        const mapNavItem = document.querySelector('.nav-item[data-page="map-page-content"]'); // Get map nav item
-
+        let mapPageFirstLoad = true; 
+        const mapNavItem = document.querySelector('.nav-item[data-page="map-page-content"]');
 
         function switchPage(pageId) {
             pages.forEach(page => page.classList.remove('active-page'));
-            document.getElementById(pageId).classList.add('active-page');
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active-page');
+            }
             
             navItems.forEach(item => {
                 item.classList.remove('active-nav-item');
@@ -694,13 +700,13 @@
             if (pageId === 'map-page-content') {
                 setupMapInstance(); 
                 setTimeout(() => { 
-                    map.invalidateSize();
+                    if (map) map.invalidateSize();
                     if (mapPageFirstLoad || !activeStoryLessons || activeStoryLessons.length === 0) { 
                         loadStoryOnMap(); 
                         mapPageFirstLoad = false; 
                     } else {
-                         if (infoPanel.classList.contains('expanded')) {
-                            closePanelBtn.innerHTML = chevronDownSVG;
+                        if (infoPanel.classList.contains('expanded')) {
+                            closePanelBtn.innerHTML = chevronDownSVG; 
                         } else {
                             collapseInfoPanel(); 
                         }
@@ -708,8 +714,7 @@
                 }, 0);
                 infoPanel.classList.remove('hidden-fully'); 
             } else {
-                infoPanel.classList.remove('expanded', 'collapsed');
-                infoPanel.classList.add('hidden-fully'); 
+                collapseInfoPanel(true);
             }
         }
 
@@ -721,7 +726,8 @@
             storyData.forEach(story => {
                 const card = document.createElement('div');
                 card.className = 'story-card';
-                const progressPercentage = story.totalEpisodes > 0 ? (story.episodesCompleted / story.totalEpisodes) * 100 : 0;
+                const completedLessonsCount = story.lessons.filter(l => l.status === 'completed').length;
+                const progressPercentage = story.totalEpisodes > 0 ? (completedLessonsCount / story.totalEpisodes) * 100 : 0;
                 
                 card.innerHTML = `
                     <img src="${story.backgroundImageUrl}" alt="${story.title}" class="story-card-image" onerror="this.src='https://placehold.co/300x400/CCCCCC/FFF?text=Image+Error'; this.onerror=null;">
@@ -736,27 +742,23 @@
                 `;
                 card.addEventListener('click', () => {
                     console.log(`Story selected: ${story.title}`);
-                    activeStoryLessons = story.lessons || [];
+                    activeStoryLessons = JSON.parse(JSON.stringify(story.lessons || [])); 
                     mapPageFirstLoad = true; 
-                    if (mapNavItem) mapNavItem.classList.remove('nav-item-disabled'); // Enable map nav item
+                    if (mapNavItem) mapNavItem.classList.remove('nav-item-disabled');
                     switchPage('map-page-content');
                 });
                 gridContainer.appendChild(card);
             });
         }
 
+        // --- Event Listeners ---
         navItems.forEach(item => item.addEventListener('click', () => {
-            if (item.classList.contains('nav-item-disabled')) return; // Prevent click if disabled
+            if (item.classList.contains('nav-item-disabled')) return;
             switchPage(item.dataset.page);
         }));
         
-        switchPage('stories-page-content'); 
-        renderStoryCards(); 
-        if (mapNavItem) mapNavItem.classList.add('nav-item-disabled'); // Disable map nav item initially
-
-
         closePanelBtn.addEventListener('click', (e) => {
-            L.DomEvent.stopPropagation(e);
+            L.DomEvent.stopPropagation(e); 
             if (infoPanel.classList.contains('expanded')) collapseInfoPanel();
             else if (infoPanel.classList.contains('collapsed')) expandInfoPanel();
         });
@@ -775,8 +777,49 @@
             if (currentLocationIndex < activeStoryLessons.length - 1) displayLocationDetails(currentLocationIndex + 1);
         });
         
+        infoContent.addEventListener('click', (event) => {
+            if (event.target && event.target.id === 'start-lesson-action-button') {
+                const scenario = activeStoryLessons[currentLocationIndex];
+                if (scenario && scenario.status === 'current') {
+                    console.log(`Starting lesson: ${scenario.scenarioTitle}`);
+                    scenario.status = 'completed';
+                    scenario.performance = 'bronze'; 
+                    
+                    markers[currentLocationIndex].setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
+                    markers[currentLocationIndex].setZIndexOffset(Z_INDEX_COMPLETED); // Update zIndex for completed
+                    
+                    const statusIndicatorDiv = infoContent.querySelector('.status-indicator-container');
+                    if (statusIndicatorDiv) {
+                         const newStatusIndicatorHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
+                         statusIndicatorDiv.outerHTML = newStatusIndicatorHTML; 
+                    }
+                    const imgElement = infoContent.querySelector('img');
+                    if(imgElement) imgElement.classList.remove('grayscale');
+
+                    const nextScenarioIndex = currentLocationIndex + 1;
+                    if (nextScenarioIndex < activeStoryLessons.length && activeStoryLessons[nextScenarioIndex].status === 'locked') {
+                        activeStoryLessons[nextScenarioIndex].status = 'current';
+                        markers[nextScenarioIndex].setIcon(createLocationIcon(nextScenarioIndex + 1, false, 'current', null));
+                        markers[nextScenarioIndex].setZIndexOffset(Z_INDEX_CURRENT); // Update zIndex for new current
+                    }
+                    updateNavigationControls(); 
+                    
+                    if (nextScenarioIndex < activeStoryLessons.length) {
+                        setTimeout(() => displayLocationDetails(nextScenarioIndex), 300); 
+                    } else { 
+                        collapseInfoPanel();
+                    }
+                }
+            }
+        });
+
         L.DomEvent.disableClickPropagation(infoPanel);
         window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+
+        // --- Initial Application Setup ---
+        switchPage('stories-page-content'); 
+        renderStoryCards(); 
+        if (mapNavItem) mapNavItem.classList.add('nav-item-disabled'); 
 
     </script>
 </body>
