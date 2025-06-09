@@ -203,6 +203,25 @@
         #all-stories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 0 15px; }
         .filters { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; background-color: var(--card-background); padding: 15px; border-radius: 8px; margin: 0 15px 20px 15px; }
         .filters input, .filters select { background-color: #333; color: var(--text-color); border: 1px solid #555; border-radius: 4px; padding: 8px 12px; font-size: 0.9rem; flex-grow: 1; }
+        
+        .load-more-container {
+            text-align: center;
+            padding: 20px;
+        }
+        .load-more-btn {
+            background-color: var(--accent-color);
+            color: var(--secondary-color);
+            border: none;
+            padding: 10px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .load-more-btn.hidden {
+            display: none;
+        }
+
 
         /* --- Panel --- */
         .panel { position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--card-background); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 1000; max-height: 90vh; overflow-y: auto; visibility: hidden; }
@@ -317,6 +336,9 @@
             
             let sliderInterval;
             let currentSlideIndex = 0;
+            let allStoriesCurrentPage = 1;
+            const storiesPerPage = 8;
+            let currentFilteredStories = [];
             
             // --- Helper Functions ---
             const getStoryById = (id) => storyData.find(s => s.id === id);
@@ -436,24 +458,44 @@
                 }, 5000);
             }
             
-            function renderAllStoriesGrid() {
-                 const grid = document.getElementById('all-stories-grid');
+            function applyFilters() {
                  const keyword = document.getElementById('search-input').value.toLowerCase();
                  const level = document.getElementById('level-filter').value;
                  const topic = document.getElementById('topic-filter').value;
 
-                 const filteredStories = storyData.filter(story => {
+                 currentFilteredStories = storyData.filter(story => {
                      const matchesKeyword = (story.title.toLowerCase() + story.character.toLowerCase()).includes(keyword) || story.tags.join(' ').includes(keyword);
                      const matchesLevel = !level || story.level.includes(level);
                      const matchesTopic = !topic || story.tags.includes(topic);
                      return matchesKeyword && matchesLevel && matchesTopic;
                  });
-                
-                 if (filteredStories.length > 0) {
-                      grid.innerHTML = filteredStories.map(story => createStoryCard(story)).join('');
-                 } else {
-                     grid.innerHTML = `<p style="padding: 0 15px;">No stories match your criteria.</p>`;
-                 }
+                 allStoriesCurrentPage = 1;
+                 renderAllStoriesPage();
+            }
+
+            function renderAllStoriesPage() {
+                const grid = document.getElementById('all-stories-grid');
+                const loadMoreBtn = document.getElementById('load-more-btn');
+
+                const start = (allStoriesCurrentPage - 1) * storiesPerPage;
+                const end = start + storiesPerPage;
+                const storiesToRender = currentFilteredStories.slice(start, end);
+
+                if (allStoriesCurrentPage === 1) {
+                    grid.innerHTML = '';
+                }
+
+                if (storiesToRender.length === 0 && allStoriesCurrentPage === 1) {
+                    grid.innerHTML = `<p style="padding: 0 15px;">No stories match your criteria.</p>`;
+                } else {
+                    grid.innerHTML += storiesToRender.map(story => createStoryCard(story)).join('');
+                }
+
+                if (end >= currentFilteredStories.length) {
+                    loadMoreBtn.classList.add('hidden');
+                } else {
+                    loadMoreBtn.classList.remove('hidden');
+                }
             }
             
             function renderContent() {
@@ -480,16 +522,23 @@
                              </select>
                         </div>
                         <div id="all-stories-grid"></div>
+                        <div class="load-more-container">
+                            <button id="load-more-btn" class="load-more-btn">Load More</button>
+                        </div>
                     </div>
                 `;
-                renderAllStoriesGrid();
+                applyFilters();
                 setupFilterListeners();
             }
             
             function setupFilterListeners() {
-                document.getElementById('search-input').addEventListener('input', renderAllStoriesGrid);
-                document.getElementById('level-filter').addEventListener('change', renderAllStoriesGrid);
-                document.getElementById('topic-filter').addEventListener('change', renderAllStoriesGrid);
+                document.getElementById('search-input').addEventListener('input', applyFilters);
+                document.getElementById('level-filter').addEventListener('change', applyFilters);
+                document.getElementById('topic-filter').addEventListener('change', applyFilters);
+                document.getElementById('load-more-btn').addEventListener('click', () => {
+                    allStoriesCurrentPage++;
+                    renderAllStoriesPage();
+                });
             }
 
             // --- Initialization ---
