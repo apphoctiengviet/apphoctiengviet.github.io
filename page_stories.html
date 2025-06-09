@@ -55,6 +55,7 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
+            align-items: center; /* Center content horizontally */
         }
 
         .slide-image {
@@ -72,6 +73,10 @@
             padding: 30px 20px;
             color: var(--secondary-color);
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            text-align: center; /* Center text */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .slide-title { font-size: 1.8rem; font-weight: bold; margin: 0 0 10px 0; }
@@ -86,9 +91,15 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.2s, color 0.2s;
-            align-self: flex-start;
+            display: flex; /* Use flexbox for icon alignment */
+            align-items: center;
+            gap: 8px; /* Space between icon and text */
         }
         .slide-button:hover { background-color: var(--accent-color); color: var(--secondary-color); }
+        .slide-button svg {
+            width: 18px;
+            height: 18px;
+        }
 
         .slider-nav { position: absolute; top: 50%; left: 10px; right: 10px; transform: translateY(-50%); display: flex; justify-content: space-between; z-index: 3; }
         .slider-nav button { background: rgba(0,0,0,0.5); border: none; color: white; font-size: 2rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -174,7 +185,7 @@
 
         /* Lock Styles */
         .story-card.locked {
-            cursor: not-allowed;
+            cursor: pointer;
         }
         .story-card.locked .story-image {
             filter: grayscale(100%) brightness(0.6);
@@ -205,6 +216,11 @@
         .panel-meta { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px; font-size: 0.9rem; color: var(--text-muted-color); }
         .stars { color: var(--star-color); }
         .start-btn { background-color: var(--accent-color); color: var(--secondary-color); border: none; padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 20px; transition: background-color 0.2s; }
+        .start-btn:disabled {
+            background-color: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
 
         /* --- Bottom Navigation --- */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background-color: var(--card-background); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; z-index: 500; }
@@ -268,7 +284,7 @@
             const levelMap = { 'A1': 1, 'A2': 2, 'B1': 3, 'B2': 4, 'C1': 5, 'C2': 6 };
             
             const storyData = [
-                { "id": 1, "character": "Liam", "title": "Hanoi Study Year", "category": "Student Life", "level": "A2", "description": "Join Liam, a college student on his study abroad year in Hanoi. Help him navigate campus life, order street food like a local, and make new friends. Perfect for learning essential daily conversation.", "episodes": 10, "seasons": 1, "stars": 4.5, "progress": 25, "imageUrl": "https://plus.unsplash.com/premium_photo-1661434380261-ca9305950dd3?q=80&w=1372&auto=format&fit=crop", "featured": false, "suggested": false, "tags": ["student life", "hanoi", "daily"] },
+                { "id": 1, "character": "Liam", "title": "Hanoi Study Year", "category": "Student Life", "level": "A2", "description": "Join Liam, a college student on his study abroad year in Hanoi. Help him navigate campus life, order street food like a local, and make new friends. Perfect for learning essential daily conversation.", "episodes": 10, "seasons": 1, "stars": 4.5, "progress": 25, "imageUrl": "https://plus.unsplash.com/premium_photo-1661436612606-11b3af6451f2?q=80&w=1460&auto=format&fit=crop", "featured": false, "suggested": true, "tags": ["student life", "hanoi", "daily"] },
                 { "id": 2, "character": "Chloe", "title": "New Life in Da Nang", "category": "Family & Culture", "level": "B1", "description": "Chloe just moved to Da Nang to start a new life with her husband's family. Follow her story as she navigates the beautiful dynamics of a Vietnamese family, from market shopping with her mother-in-law to celebrating traditional holidays.", "episodes": 8, "seasons": 1, "stars": 4.8, "progress": 0, "imageUrl": "https://images.unsplash.com/photo-1576510683662-0f5a01be2114?q=80&w=1632&auto=format&fit=crop", "featured": true, "suggested": false, "tags": ["culture", "family", "da nang"] },
                 { "id": 3, "character": "Mia", "title": "The Gap Year Journey", "category": "Travel & Adventure", "level": "A2", "description": "Mia is taking a gap year to explore all of Vietnam on a budget. From the mountains of Sapa to the beaches of Phu Quoc, each episode is a new adventure. This series is great for travel vocabulary and understanding regional differences.", "episodes": 12, "seasons": 1, "stars": 4.7, "progress": 75, "imageUrl": "https://images.unsplash.com/photo-1569654851706-bb83eafe0711?q=80&w=1470&auto=format&fit=crop", "featured": false, "suggested": true, "tags": ["travel", "adventure"] },
                 { "id": 4, "character": "Tanaka", "title": "The Saigon Deal", "category": "Business", "level": "B2", "description": "Mr. Tanaka is in Ho Chi Minh City to close a big deal. Help him master formal greetings, business negotiation language, and the art of the business dinner. This series is crucial for professionals looking to succeed in Vietnam.", "episodes": 6, "seasons": 1, "stars": 4.6, "progress": 0, "imageUrl": "https://images.unsplash.com/photo-1596574027151-2ce81d85af3e?q=80&w=1474&auto=format&fit=crop", "featured": true, "suggested": false, "tags": ["business", "saigon", "formal"] },
@@ -315,7 +331,18 @@
                 panel.querySelector('#panel-seasons').textContent = `${story.seasons} Season${story.seasons > 1 ? 's' : ''}`;
                 panel.querySelector('#panel-episodes').textContent = `${story.episodes} Episodes`;
                 panel.querySelector('#panel-stars').innerHTML = `&#9733; ${story.stars}`;
-                panel.querySelector('#panel-start-btn').textContent = story.progress > 0 ? 'Continue' : 'Start';
+                
+                const startBtn = panel.querySelector('#panel-start-btn');
+                const locked = isStoryLocked(story.level);
+
+                if (locked) {
+                    startBtn.textContent = 'Insufficient Level';
+                    startBtn.disabled = true;
+                } else {
+                    startBtn.disabled = false;
+                    startBtn.textContent = story.progress > 0 ? 'Continue' : 'Start';
+                }
+
                 panel.classList.add('active');
             }
 
@@ -374,7 +401,10 @@
                         <div class="slide-content">
                             <h2 class="slide-title">${story.character}'s ${story.title}</h2>
                             <p class="slide-description">${story.category}</p>
-                            <button class="slide-button" data-id="${story.id}">View Story</button>
+                            <button class="slide-button" data-id="${story.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+                                <span>View Story</span>
+                            </button>
                         </div>
                     </div>`).join('');
 
@@ -469,7 +499,7 @@
             closePanelBtn.addEventListener('click', () => panel.classList.remove('active'));
             document.body.addEventListener('click', e => {
                 const card = e.target.closest('.story-card');
-                if (card && !card.classList.contains('locked')) { // Check for 'locked' class
+                if (card) { 
                     openPanel(getStoryById(parseInt(card.dataset.id)));
                 }
                 const slideButton = e.target.closest('.slide-button');
