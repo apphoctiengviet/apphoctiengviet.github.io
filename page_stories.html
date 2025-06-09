@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vietnamese Learning Adventures - Story Chooser</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    <style>
+        /* Custom font */
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior-y: contain;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #111827; /* Dark background for Netflix feel */
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Page Content Area */
+        #page-content-area {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            background-color: #111827; /* Dark background */
+            overflow-y: auto;
+            padding-bottom: 76px; /* 60px for nav + 16px for breathing room */
+            box-sizing: border-box; /* Ensure padding is included in height calculation */
+        }
+        .page.active-page {
+            display: flex;
+        }
+        
+        #map-page-content {
+            overflow: hidden;
+            padding-bottom: 0;
+        }
+
+        /* --- Netflix-Inspired Stories Page --- */
+        #stories-page-content {
+            padding-top: 1rem;
+        }
+
+        /* Hero Slider */
+        #hero-slider-container {
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+        .hero-carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 2rem;
+            padding: 0 1.5rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .hero-carousel::-webkit-scrollbar {
+            display: none;
+        }
+        .hero-poster-card {
+            scroll-snap-align: center;
+            flex: 0 0 85%;
+            aspect-ratio: 16 / 9;
+            border-radius: 0.75rem;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+        }
+        .hero-poster-card .story-poster-image {
+            transition: transform 0.3s ease-in-out;
+        }
+        .hero-poster-card:hover .story-poster-image {
+            transform: scale(1.05);
+        }
+        .hero-poster-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, transparent 70%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1.5rem;
+        }
+        .hero-poster-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .hero-poster-subtitle {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #E5E7EB;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Regular Carousels */
+        .story-category {
+            margin-bottom: 2.5rem;
+        }
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #F9FAFB;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .story-carousel {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0 1.5rem 1rem 1.5rem;
+            gap: 1rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .story-carousel::-webkit-scrollbar {
+            display: none;
+        }
+        .story-poster-card {
+            flex: 0 0 150px;
+            aspect-ratio: 2 / 3;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+        .story-poster-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+        }
+        .story-poster-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+        }
+        .story-poster-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 20%, transparent 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 0.75rem;
+        }
+        .story-poster-title {
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.2;
+        }
+        .progress-bar-container-poster {
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            right: 5%;
+            width: 90%;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+        .progress-bar-fill-poster {
+            height: 100%;
+            background-color: #F59E0B; /* Amber color */
+            border-radius: 2px;
+        }
+
+        /* Level Badges */
+        .level-badge-container {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            z-index: 5;
+            display: flex;
+            gap: 0.25rem;
+        }
+        .level-badge {
+            background-color: rgba(23, 37, 84, 0.8); /* Indigo-900 with opacity */
+            backdrop-filter: blur(2px);
+            color: #E0E7FF; /* Indigo-100 */
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.5); /* Indigo-400 with opacity */
+        }
+        
+        /* --- Story Detail Panel --- */
+        #story-detail-panel {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1200;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #story-detail-panel.visible {
+            display: block;
+            opacity: 1;
+        }
+        .detail-panel-content {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            max-height: 90vh;
+            background-color: #1F2937;
+            border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem;
+            overflow: hidden; display: flex; flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #story-detail-panel.visible .detail-panel-content {
+            transform: translateY(0);
+        }
+        #detail-panel-close-btn {
+            position: absolute; top: 1rem; right: 1rem;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 9999px;
+            padding: 0.5rem;
+            z-index: 10;
+        }
+        .detail-panel-image-container { height: 45vh; position: relative; }
+        .detail-panel-image { width: 100%; height: 100%; object-fit: cover; }
+        .detail-panel-image-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, #1F2937 10%, transparent 100%);
+        }
+        .detail-panel-scrollable {
+            padding: 1.5rem; padding-top: 0;
+            margin-top: -5rem;
+            position: relative; overflow-y: auto;
+        }
+        .detail-panel-title { font-size: 2.25rem; font-weight: 800; color: white; line-height: 1.1; }
+        .detail-panel-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 1rem; color: #9CA3AF; font-size: 0.875rem; margin-top: 0.75rem; }
+        .detail-panel-levels-list .level-badge {
+            background-color: #374151; color: #D1D5DB; border: none;
+        }
+        #detail-start-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; background-color: #10B981; color: white; font-weight: 600; padding: 0.75rem; border-radius: 0.5rem; margin-top: 1.5rem; transition: background-color 0.2s; }
+        #detail-start-btn:hover { background-color: #059669; }
+        .detail-panel-description { color: #D1D5DB; margin-top: 1.5rem; line-height: 1.6; font-size: 1rem; }
+
+        /* --- Map and Original Components --- */
+        #map-container { width: 100%; height: 100%; z-index: 1; }
+        #map { height: 100%; width: 100%; background-color: #111827; }
+        #info-panel { position: fixed; bottom: 60px; left: 0; right: 0; width: 100%; background-color: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; display: flex; flex-direction: column; height: 60vh; transform: translateY(100%); transition: transform 0.3s ease-in-out, height 0.3s ease-in-out; z-index: 1000; }
+        #info-panel.expanded { transform: translateY(0); height: 60vh; }
+        #info-panel.collapsed { transform: translateY(0); height: 80px; }
+        #info-panel.hidden-fully { transform: translateY(100%); }
+        #info-panel.collapsed #info-content-wrapper, #info-panel.collapsed #info-panel-navigation { display: none; }
+        #info-panel.collapsed #info-panel-header { border-bottom: none; }
+        .custom-marker-icon { color: white; border-radius: 50%; text-align: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: all 0.15s ease-in-out; }
+        .custom-marker-icon.status-locked-upcoming { background-color: #3B82F6; }
+        .custom-marker-icon.status-current { background-color: #10B981; animation: pulse-current 2s infinite; }
+        .custom-marker-icon.status-completed-base { background-color: #047857; }
+        .custom-marker-icon.status-completed-bronze { background-color: #D97706; }
+        .custom-marker-icon.status-completed-silver { background-color: #94A3B8; }
+        .custom-marker-icon.status-completed-gold { background-color: #FACC15; color: #422006; }
+        @keyframes pulse-current { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7), 0 2px 5px rgba(0,0,0,0.3); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0), 0 2px 5px rgba(0,0,0,0.3); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 2px 5px rgba(0,0,0,0.3); } }
+        #info-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.5rem; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; cursor: pointer; }
+        #panel-title { min-width: 0; }
+        #close-panel-btn { padding: 0.25rem; }
+        #drag-handle { width: 40px; height: 4px; background-color: #D1D5DB; border-radius: 2px; margin: 0.5rem auto 0.25rem; flex-shrink: 0; cursor: pointer; }
+        #info-panel-navigation { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1.5rem; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
+        #info-panel-navigation button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #info-panel-navigation button:disabled svg { color: #9CA3AF; }
+        #info-content-wrapper { flex-grow: 1; overflow-y: auto; padding: 0 1.5rem 1.5rem; -webkit-overflow-scrolling: touch; display: block; }
+        #info-content img { height: 160px; margin-bottom: 1rem; transition: filter 0.3s ease-in-out; }
+        #info-content img.grayscale { filter: grayscale(100%); }
+        .key-phrases-title { font-weight: 600; color: #374151; margin-top: 0.75rem; margin-bottom: 0.25rem; }
+        .key-phrases-list { list-style-type: disc; margin-left: 1.25rem; font-size: 0.875rem; color: #4B5563; }
+        .scenario-description { font-size: 0.875rem; color: #4B5563; margin-top: 0.5rem; line-height: 1.6; }
+        .status-indicator-container { display: flex; justify-content: center; align-items: center; margin-top: 0.75rem; margin-bottom: 1rem; }
+        .status-indicator-container svg { width: 1.75rem; height: 1.75rem; margin-right: 0.25rem; }
+        .status-indicator-container svg:last-child { margin-right: 0; }
+        .star-filled { color: #FACC15; }
+        .star-empty { color: #D1D5DB; }
+        .lock-icon { color: #6B7280; width: 2rem !important; height: 2rem !important; }
+        .start-lesson-button { background-color: #10B981; color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: background-color 0.2s ease-in-out; }
+        .start-lesson-button:hover { background-color: #059669; }
+
+        /* --- Bottom Nav --- */
+        #bottom-nav { width: 100%; height: 60px; background-color: #1F2937; border-top: 1px solid #374151; display: flex; justify-content: space-around; align-items: center; position: fixed; bottom: 0; left: 0; z-index: 1100; flex-shrink: 0; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; padding: 0.5rem 0; font-size: 0.75rem; color: #9CA3AF; cursor: pointer; transition: color 0.2s ease-in-out; }
+        .nav-item:hover { color: #10B981; }
+        .nav-item.active-nav-item { color: #10B981; font-weight: 600; }
+        .nav-item.nav-item-disabled { color: #4B5563; cursor: not-allowed; pointer-events: none; }
+        .nav-item.nav-item-disabled:hover { color: #4B5563; }
+        .nav-item svg { width: 1.5rem; height: 1.5rem; margin-bottom: 0.25rem; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="page-content-area">
+        <div id="stories-page-content" class="page active-page">
+            <!-- Story carousels will be dynamically inserted here -->
+        </div>
+
+        <div id="map-page-content" class="page">
+            <div id="map-container"><div id="map"></div></div>
+        </div>
+
+        <div id="profile-page-content" class="page">
+            <div class="p-8">
+                <h1 class="text-2xl font-bold text-gray-100">User Profile</h1>
+                <p class="mt-4 text-gray-400">User settings and profile information will go here.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Story Detail Panel (Modal) -->
+    <div id="story-detail-panel">
+        <div class="detail-panel-content">
+            <div class="detail-panel-image-container">
+                <img id="detail-panel-img" src="" alt="Story background" class="detail-panel-image">
+                <div class="detail-panel-image-overlay"></div>
+                <button id="detail-panel-close-btn" class="text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="detail-panel-scrollable">
+                <h2 id="detail-panel-title" class="detail-panel-title"></h2>
+                <div class="detail-panel-meta">
+                    <span id="detail-panel-level-container" class="detail-panel-levels-list"></span>
+                    <span>&bull;</span>
+                    <span id="detail-panel-episodes"></span>
+                </div>
+                <p id="detail-panel-description" class="detail-panel-description"></p>
+                <button id="detail-start-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="detail-start-btn-text"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Info Panel -->
+    <div id="info-panel">
+        <div id="drag-handle"></div>
+        <div id="info-panel-header">
+            <h2 id="panel-title" class="text-xl font-bold text-gray-800 truncate">Scenario Details</h2>
+            <button id="close-panel-btn" class="text-gray-500 hover:text-gray-700"></button>
+        </div>
+        <div id="info-panel-navigation">
+            <button id="prev-location-btn" class="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <span id="current-location-indicator" class="text-sm font-medium text-gray-600"></span>
+            <button id="next-location-btn" class="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+        <div id="info-content-wrapper"><div id="info-content"><p class="text-gray-600">Select a scenario marker to begin learning!</p></div></div>
+    </div>
+
+    <nav id="bottom-nav">
+        <div class="nav-item active-nav-item" data-page="stories-page-content">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg><span>Stories</span>
+        </div>
+        <div class="nav-item" data-page="map-page-content">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503-8.495l4.875-2.178A.75.75 0 0121 7.22v10.582a.75.75 0 01-1.125.658l-4.875-2.178a.75.75 0 010-1.316l4.875-2.178a.75.75 0 011.125.658zM9 6.75h.008v.008H9V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM15 8.25h.008v.008H15V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg><span>Map</span>
+        </div>
+        <div class="nav-item" data-page="profile-page-content">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg><span>Profile</span>
+        </div>
+    </nav>
+
+
+    <script>
+        // --- Dummy Lesson Data ---
+        const dummyLessons = (count) => Array.from({ length: count }, (_, i) => ({ id: `dummy_${i}`, status: 'locked', performance: null }));
+        const alexaStoryLessons = [
+             { id: 'alexa_ep1', coords: [21.2212, 105.8040], scenarioTitle: "Airport Arrival & Taxi", learningFocus: "Customs, taxi, directions.", keyPhrases: ["Xin chào", "Taxi ở đâu?", "Đến khách sạn này.", "Bao nhiêu tiền?"], dialoguePrompt: "Navigate immigration and find a taxi.", imageUrl: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1935&auto=format&fit=crop", status: 'completed', performance: 'gold' },
+             { id: 'alexa_ep2', coords: [21.0338, 105.8522], scenarioTitle: "First Bowl of Phở", learningFocus: "Ordering food, menu items.", keyPhrases: ["Cho tôi một bát phở bò.", "Không hành.", "Ngon quá!", "Tính tiền."], dialoguePrompt: "Order Phở at a street stall.", imageUrl: "https://images.unsplash.com/photo-1582610285924-f4197e885138?q=80&w=1887&auto=format&fit=crop", status: 'completed', performance: 'silver' },
+             { id: 'alexa_ep3', coords: [21.0288, 105.8358], scenarioTitle: "Cultural Visit", learningFocus: "Info, opening hours, tickets.", keyPhrases: ["Vé vào cổng?", "Mở cửa lúc mấy giờ?", "Chụp ảnh được không?"], dialoguePrompt: "Visit Temple of Literature.", imageUrl: "https://images.unsplash.com/photo-1596395825203-b072865e94be?q=80&w=1887&auto=format&fit=crop", status: 'current', performance: null },
+             { id: 'alexa_ep4', coords: [20.9101, 107.1839], scenarioTitle: "Ha Long Bay Cruise", learningFocus: "Booking cruise, activities.", keyPhrases: ["Tour đi Vịnh Hạ Long?", "Có kayak không?", "Ngắm hoàng hôn."], dialoguePrompt: "Inquire about a Ha Long Bay day cruise.", imageUrl: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2071&auto=format&fit=crop", status: 'locked', performance: null },
+             { id: 'alexa_ep5', coords: [16.4637, 107.5909], scenarioTitle: "City Tour by Cyclo (Hue)", learningFocus: "Negotiating price, directions.", keyPhrases: ["Đi một vòng thành phố?", "Giá bao nhiêu?", "Đến cầu Tràng Tiền."], dialoguePrompt: "Negotiate a cyclo tour in Hue.", imageUrl: "https://images.unsplash.com/photo-1559983160-bfcb4ce93a95?q=80&w=1887&auto=format&fit=crop", status: 'locked', performance: null },
+        ];
+        const brianStoryLessons = [
+             { id: 'brian_ep1', coords: [10.0370, 105.7882], scenarioTitle: "Dinner with In-Laws (Can Tho)", learningFocus: "Table manners, family vocab.", keyPhrases: ["Mời cả nhà ăn cơm.", "Món này ngon quá!", "Để con giúp."], dialoguePrompt: "Compliment food with in-laws.", imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1887&auto=format&fit=crop", status: 'current', performance: null },
+             { id: 'brian_ep2', coords: [10.2380, 106.3760], scenarioTitle: "Orchard Visit (Ben Tre)", learningFocus: "Fruits, farming.", keyPhrases: ["Trái cây này là gì?", "Vườn rộng quá!", "Hái thử được không?"], dialoguePrompt: "Ask about fruits in an orchard.", imageUrl: "https://images.unsplash.com/photo-1601247387343-344587353b1b?q=80&w=1887&auto=format&fit=crop", status: 'locked', performance: null },
+             ...dummyLessons(8)
+        ];
+        const christineStoryLessons = [
+             { id: 'christine_ep1', coords: [16.0545, 108.2208], scenarioTitle: "Business Meeting (Da Nang)", learningFocus: "Formal intros, business cards.", keyPhrases: ["Rất vui được gặp anh/chị.", "Đây là danh thiếp của tôi.", "Thảo luận về dự án."], dialoguePrompt: "Introduce yourself formally.", imageUrl: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1932&auto=format&fit=crop", status: 'completed', performance: 'gold' },
+             { id: 'christine_ep2', coords: [15.7731, 108.2905], scenarioTitle: "Historical Research (My Son)", learningFocus: "Detailed history, architecture.", keyPhrases: ["Di tích này bao nhiêu tuổi?", "Kiến trúc này ý nghĩa gì?", "Nghiên cứu văn hóa Chăm."], dialoguePrompt: "Ask about Cham architecture.", imageUrl: "https://images.unsplash.com/photo-1629731247385-a705a6152a5c?q=80&w=1887&auto=format&fit=crop", status: 'completed', performance: 'gold' },
+             { id: 'christine_ep3', coords: [12.6675, 108.0470], scenarioTitle: "Coffee Highlands (Buon Ma Thuot)", learningFocus: "Coffee production, tasting.", keyPhrases: ["Cà phê ở đây nổi tiếng.", "Quy trình trồng cà phê?", "Thử cà phê chồn."], dialoguePrompt: "Ask about coffee making.", imageUrl: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1887&auto=format&fit=crop", status: 'current', performance: null },
+             ...dummyLessons(7)
+        ];
+        const davidStoryLessons = [
+            { id: 'david_ep1', coords: [21.0060, 105.8430], scenarioTitle: "Uni Campus Life (Hanoi)", learningFocus: "Student life, classes, plans.", keyPhrases: ["Bạn học ngành gì?", "Lớp này khó không?", "Tối nay đi chơi?"], dialoguePrompt: "Chat with a classmate.", imageUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1740&auto=format&fit=crop", status: 'locked', performance: null },
+            ...dummyLessons(9)
+        ];
+
+        // --- Story Data (EXPANDED) ---
+        const storyData = [
+            { id: 'story1', title: 'Alexa\'s Adventure', subtitle: 'Beginner Tourist', featured: true, levels: ['A1', 'A2'], description: "Join Alexa on her first trip to Vietnam! From navigating the bustling streets of Hanoi to cruising the emerald waters of Ha Long Bay, this story is perfect for mastering essential travel phrases and cultural etiquette.", totalEpisodes: 5, backgroundImageUrl: 'https://images.unsplash.com/photo-1528181304800-259b08848526?q=80&w=2070&auto=format&fit=crop', lessons: alexaStoryLessons },
+            { id: 'story5', title: 'Saigon Street Food', subtitle: 'Food & Culture', featured: true, levels: ['A2', 'B1'], description: "Eat your way through Ho Chi Minh City! Learn the names of popular street foods, how to order, and how to bargain at local markets. A delicious journey for your tastebuds and your vocabulary.", totalEpisodes: 8, backgroundImageUrl: 'https://images.unsplash.com/photo-1554118811-2b45a195b871?q=80&w=2070&auto=format&fit=crop', lessons: dummyLessons(8) },
+            { id: 'story2', title: 'Brian\'s Family Visit', subtitle: 'Intermediate Culture', featured: false, levels: ['B1'], description: "Brian is visiting his wife's family in the Mekong Delta. Learn conversational Vietnamese for family gatherings, traditional meals, and exploring the lush countryside with locals. A heartwarming dive into family life.", totalEpisodes: 10, backgroundImageUrl: 'https://images.unsplash.com/photo-1631225579954-463863673738?q=80&w=1887&auto=format&fit=crop', lessons: brianStoryLessons },
+            { id: 'story3', title: 'Christine\'s Research', subtitle: 'Advanced Professional', featured: false, levels: ['B2', 'C1'], description: "Follow Christine, a historian, as she travels through Central Vietnam for her research. This story focuses on advanced vocabulary for business meetings, academic discussions, and formal presentations.", totalEpisodes: 10, backgroundImageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop', lessons: christineStoryLessons },
+            { id: 'story4', title: 'David the Backpacker', subtitle: 'Beginner Adventure', featured: false, levels: ['A2'], description: "David is a university student backpacking through Northern Vietnam. This story is packed with slang, casual conversation, and language for adventures like hiking, market haggling, and making new friends on the road.", totalEpisodes: 10, backgroundImageUrl: 'https://images.unsplash.com/photo-1593894812389-543168d6334a?q=80&w=1964&auto=format&fit=crop', lessons: davidStoryLessons },
+            { id: 'story6', title: 'The Lost Temple', subtitle: 'Mystery', featured: false, levels: ['B1-B2'], description: "An ancient map, a hidden temple, and a thrilling mystery. Sharpen your descriptive language and past-tense narration as you piece together clues to find a long-lost relic.", totalEpisodes: 12, backgroundImageUrl: 'https://images.unsplash.com/photo-1542649768-99324b9b4991?q=80&w=1974&auto=format&fit=crop', lessons: dummyLessons(12) },
+            { id: 'story7', title: 'Startup Pitch', subtitle: 'Business Vietnamese', featured: false, levels: ['C1', 'C2'], description: "Navigate the fast-paced world of Vietnam's tech scene. Prepare your pitch, negotiate with investors, and build your company. This story is for advanced learners focusing on professional and technical language.", totalEpisodes: 8, backgroundImageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1784&auto=format&fit=crop', lessons: dummyLessons(8) },
+            { id: 'story8', title: 'A Poet in Hue', subtitle: 'Literature & Arts', featured: false, levels: ['B2'], description: "Immerse yourself in the romantic and artistic world of Hue. Discuss poetry, art, and history in the former imperial capital. Perfect for learners who appreciate the beauty of the Vietnamese language.", totalEpisodes: 6, backgroundImageUrl: 'https://images.unsplash.com/photo-1589192423548-86821b033a89?q=80&w=1887&auto=format&fit=crop', lessons: dummyLessons(6) },
+        ];
+
+        // --- Global Variables & DOM Element References ---
+        let map;
+        const infoPanel = document.getElementById('info-panel');
+        const panelHeader = document.getElementById('info-panel-header');
+        const dragHandle = document.getElementById('drag-handle');
+        const panelTitleElement = document.getElementById('panel-title');
+        const infoContentWrapper = document.getElementById('info-content-wrapper');
+        const infoContent = document.getElementById('info-content');
+        const closePanelBtn = document.getElementById('close-panel-btn');
+        const prevLocationBtn = document.getElementById('prev-location-btn');
+        const nextLocationBtn = document.getElementById('next-location-btn');
+        const currentLocationIndicator = document.getElementById('current-location-indicator');
+        const storyDetailPanel = document.getElementById('story-detail-panel');
+
+        let markers = [];
+        let latLngs = [];
+        let selectedMarker = null;
+        let currentLocationIndex = -1;
+        let activeStoryLessons = [];
+        let mapMarkersLayerGroup = null;
+
+        const Z_INDEX_CURRENT = 1000;
+        const Z_INDEX_COMPLETED = 500;
+        const Z_INDEX_LOCKED = 0;
+
+        const starFilledSVG = `<svg class="star-filled" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
+        const starEmptySVG = `<svg class="star-empty" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4zm0-6a6 6 0 100 12 6 6 0 000-12zm0 1a8 8 0 100 16A8 8 0 0010 2z" clip-rule="evenodd"></path></svg>`;
+        const lockSVG = `<svg class="lock-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>`;
+        const chevronDownSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
+        const chevronUpSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>`;
+
+        
+        // --- Story Page (Netflix Style) Functions ---
+        
+        function renderAllStories() {
+            const storiesPage = document.getElementById('stories-page-content');
+            storiesPage.innerHTML = ''; // Clear previous content
+
+            // Calculate progress for each story
+            storyData.forEach(story => {
+                const completedCount = story.lessons.filter(l => l.status === 'completed').length;
+                story.progress = story.totalEpisodes > 0 ? (completedCount / story.totalEpisodes) * 100 : 0;
+                story.isStarted = completedCount > 0;
+            });
+            
+            const featured = storyData.filter(s => s.featured);
+            const continueWatching = storyData.filter(s => !s.featured && s.isStarted && s.progress < 100);
+            const recommended = storyData.filter(s => !s.featured && !s.isStarted);
+            const allStories = storyData.filter(s => !s.featured);
+
+
+            if (featured.length > 0) {
+                 storiesPage.appendChild(createHeroSlider(featured));
+            }
+            if (continueWatching.length > 0) {
+                storiesPage.appendChild(createCarousel('Continue Your Adventure', continueWatching));
+            }
+            if(recommended.length > 0) {
+                 storiesPage.appendChild(createCarousel('Recommended For You', recommended));
+            }
+            if(allStories.length > 0) {
+                 storiesPage.appendChild(createCarousel('All Stories', allStories));
+            }
+        }
+
+        function createHeroSlider(stories) {
+            const sliderContainer = document.createElement('div');
+            sliderContainer.id = 'hero-slider-container';
+            const carouselDiv = document.createElement('div');
+            carouselDiv.className = 'hero-carousel';
+
+            stories.forEach(story => {
+                const card = document.createElement('div');
+                card.className = 'hero-poster-card';
+                card.dataset.storyId = story.id;
+                
+                const levelsHTML = story.levels.map(level => `<span class="level-badge">${level}</span>`).join('');
+
+                card.innerHTML = `
+                    <img src="${story.backgroundImageUrl}" alt="${story.title}" class="story-poster-image" onerror="this.src='https://placehold.co/800x450/1F2937/FFF?text=Image'; this.onerror=null;">
+                    <div class="level-badge-container">${levelsHTML}</div>
+                    <div class="hero-poster-overlay">
+                        <div>
+                            <h3 class="hero-poster-title">${story.title}</h3>
+                            <p class="hero-poster-subtitle">${story.subtitle}</p>
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', () => showStoryDetail(story.id));
+                carouselDiv.appendChild(card);
+            });
+            sliderContainer.appendChild(carouselDiv);
+            return sliderContainer;
+        }
+
+        function createCarousel(title, stories) {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'story-category';
+            
+            const titleEl = document.createElement('h2');
+            titleEl.className = 'category-title';
+            titleEl.textContent = title;
+            categoryDiv.appendChild(titleEl);
+
+            const carouselDiv = document.createElement('div');
+            carouselDiv.className = 'story-carousel';
+
+            stories.forEach(story => {
+                const card = document.createElement('div');
+                card.className = 'story-poster-card';
+                card.dataset.storyId = story.id;
+
+                let progressBarHTML = '';
+                if (story.isStarted && story.progress < 100) {
+                    progressBarHTML = `
+                        <div class="progress-bar-container-poster">
+                            <div class="progress-bar-fill-poster" style="width: ${story.progress}%;"></div>
+                        </div>
+                    `;
+                }
+
+                const levelsHTML = story.levels.map(level => `<span class="level-badge">${level}</span>`).join('');
+
+                card.innerHTML = `
+                    <img src="${story.backgroundImageUrl}" alt="${story.title}" class="story-poster-image" onerror="this.src='https://placehold.co/300x450/1F2937/FFF?text=Image'; this.onerror=null;">
+                    <div class="level-badge-container">${levelsHTML}</div>
+                    <div class="story-poster-overlay">
+                        <h3 class="story-poster-title">${story.title}</h3>
+                    </div>
+                    ${progressBarHTML}
+                `;
+                card.addEventListener('click', () => showStoryDetail(story.id));
+                carouselDiv.appendChild(card);
+            });
+            
+            categoryDiv.appendChild(carouselDiv);
+            return categoryDiv;
+        }
+
+        function showStoryDetail(storyId) {
+            const story = storyData.find(s => s.id === storyId);
+            if (!story) return;
+
+            // Populate the panel
+            document.getElementById('detail-panel-img').src = story.backgroundImageUrl;
+            document.getElementById('detail-panel-title').textContent = story.title;
+            
+            const levelContainer = document.getElementById('detail-panel-level-container');
+            levelContainer.innerHTML = story.levels.map(level => `<span class="level-badge">${level}</span>`).join('');
+
+            document.getElementById('detail-panel-episodes').textContent = `${story.totalEpisodes} Episodes`;
+            document.getElementById('detail-panel-description').textContent = story.description;
+            
+            document.getElementById('detail-start-btn-text').textContent = story.isStarted ? 'CONTINUE STORY' : 'START STORY';
+            
+            const startBtn = document.getElementById('detail-start-btn');
+            const newStartBtn = startBtn.cloneNode(true);
+            startBtn.parentNode.replaceChild(newStartBtn, startBtn);
+            newStartBtn.addEventListener('click', () => startStory(story.id));
+
+            storyDetailPanel.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideStoryDetail() {
+             storyDetailPanel.classList.remove('visible');
+             document.body.style.overflow = '';
+        }
+        
+        function startStory(storyId) {
+            const story = storyData.find(s => s.id === storyId);
+            if (!story) return;
+
+            console.log(`Starting story: ${story.title}`);
+            activeStoryLessons = JSON.parse(JSON.stringify(story.lessons || []));
+            mapPageFirstLoad = true;
+            if (mapNavItem) mapNavItem.classList.remove('nav-item-disabled');
+            
+            hideStoryDetail();
+            setTimeout(() => { switchPage('map-page-content'); }, 300);
+        }
+
+        // --- Map & Marker Functions (No Changes Here) ---
+        function createLocationIcon(number, isSelected = false, status = 'locked', performance = null) {
+            const size = isSelected ? 40 : 30;
+            const anchor = isSelected ? [20, 40] : [15, 30];
+            let iconHtml = '';
+            let statusClassName = '';
+            const baseFontSize = '12px';
+            const selectedFontSize = '16px';
+            const checkmarkBaseFontSize = '16px';
+            const checkmarkSelectedFontSize = '20px';
+
+            switch (status) {
+                case 'locked':
+                    statusClassName = 'status-locked-upcoming';
+                    iconHtml = `<span style="font-size: ${isSelected ? selectedFontSize : baseFontSize}; line-height: ${size}px; color: #E2E8F0;">${number}</span>`;
+                    break;
+                case 'completed':
+                    iconHtml = `<span style="font-size: ${isSelected ? checkmarkSelectedFontSize : checkmarkBaseFontSize}; line-height: ${size}px;">✓</span>`;
+                    switch (performance) {
+                        case 'gold': statusClassName = 'status-completed-gold'; break;
+                        case 'silver': statusClassName = 'status-completed-silver'; break;
+                        case 'bronze': statusClassName = 'status-completed-bronze'; break;
+                        default: statusClassName = 'status-completed-base'; break;
+                    }
+                    break;
+                case 'current':
+                default:
+                    statusClassName = 'status-current';
+                    iconHtml = `<span style="font-size: ${isSelected ? selectedFontSize : baseFontSize}; line-height: ${size}px;">${number}</span>`;
+                    break;
+            }
+            return L.divIcon({
+                className: `custom-marker-icon ${statusClassName}`,
+                html: iconHtml,
+                iconSize: [size, size],
+                iconAnchor: anchor,
+                popupAnchor: [0, -(size - 2)]
+            });
+        }
+        function getStatusIndicatorHTML(status, performance) {
+            let indicatorHTML = '<div class="status-indicator-container">';
+            const maxStars = 3;
+            if (status === 'completed') {
+                let filledStars = 0;
+                switch (performance) {
+                    case 'gold': filledStars = 3; break;
+                    case 'silver': filledStars = 2; break;
+                    case 'bronze': filledStars = 1; break;
+                    default: filledStars = 0;
+                }
+                for (let i = 0; i < filledStars; i++) indicatorHTML += starFilledSVG;
+                for (let i = filledStars; i < maxStars; i++) indicatorHTML += starEmptySVG;
+            } else if (status === 'current') {
+                indicatorHTML += `<button id="start-lesson-action-button" class="start-lesson-button">START LESSON</button>`;
+            } else if (status === 'locked') {
+                indicatorHTML += lockSVG;
+            }
+            indicatorHTML += '</div>';
+            return indicatorHTML;
+        }
+
+        // --- Info Panel Functions (No Changes Here) ---
+        function updateNavigationControls() {
+            if (currentLocationIndex === -1 || activeStoryLessons.length === 0) {
+                prevLocationBtn.disabled = true;
+                nextLocationBtn.disabled = true;
+                currentLocationIndicator.textContent = `0 / ${activeStoryLessons.length}`;
+                return;
+            }
+            prevLocationBtn.disabled = currentLocationIndex === 0;
+            nextLocationBtn.disabled = currentLocationIndex >= activeStoryLessons.length - 1;
+            currentLocationIndicator.textContent = `${currentLocationIndex + 1} / ${activeStoryLessons.length}`;
+        }
+        function displayLocationDetails(indexToShow) {
+            if (!activeStoryLessons || indexToShow < 0 || indexToShow >= activeStoryLessons.length) return;
+
+            if (selectedMarker) {
+                const prevMarkerArrayIndex = markers.indexOf(selectedMarker);
+                if (prevMarkerArrayIndex !== -1 && activeStoryLessons[prevMarkerArrayIndex]) {
+                    const prevScenario = activeStoryLessons[prevMarkerArrayIndex];
+                    markers[prevMarkerArrayIndex].setIcon(createLocationIcon(prevMarkerArrayIndex + 1, false, prevScenario.status, prevScenario.performance));
+                }
+            }
+            
+            currentLocationIndex = indexToShow;
+            const scenario = activeStoryLessons[currentLocationIndex];
+            const currentMapMarker = markers[currentLocationIndex];
+
+            if (!scenario || !currentMapMarker) {
+                console.error("Scenario or marker not found for index:", indexToShow);
+                return;
+            }
+
+            currentMapMarker.setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
+            selectedMarker = currentMapMarker;
+
+            panelTitleElement.textContent = scenario.scenarioTitle;
+            const phrasesHTML = scenario.keyPhrases.map(phrase => `<li>${phrase}</li>`).join('');
+            const statusIndicatorHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
+            const imageGrayscaleClass = (scenario.status === 'locked' || scenario.status === 'current') ? 'grayscale' : '';
+
+            infoContent.innerHTML = `
+                <img src="${scenario.imageUrl}" alt="${scenario.scenarioTitle}" class="w-full object-cover rounded-lg shadow ${imageGrayscaleClass}" onerror="this.src='https://placehold.co/600x400/CCCCCC/FFF?text=Image+Error'; this.onerror=null;">
+                ${statusIndicatorHTML}
+                <h3 class="key-phrases-title">Learning Focus:</h3>
+                <p class="scenario-description">${scenario.learningFocus}</p>
+                <h3 class="key-phrases-title">Key Phrases:</h3>
+                <ul class="key-phrases-list">${phrasesHTML}</ul>
+                <h3 class="key-phrases-title">Try this:</h3>
+                <p class="scenario-description">${scenario.dialoguePrompt}</p>
+            `;
+            infoContentWrapper.style.display = 'block';
+
+            const panelWasHiddenOrCollapsed = !infoPanel.classList.contains('expanded') || infoPanel.style.transform === 'translateY(100%)';
+            
+            infoPanel.classList.remove('hidden-fully', 'collapsed');
+            infoPanel.classList.add('expanded');
+            infoPanel.style.transform = '';
+            closePanelBtn.innerHTML = chevronDownSVG;
+            updateNavigationControls();
+
+            const panelExpansionHandler = (event) => {
+                if (event.propertyName === 'transform' && infoPanel.classList.contains('expanded')) {
+                    infoPanel.removeEventListener('transitionend', panelExpansionHandler);
+                    const targetZoom = 11;
+                    const panelHeightForOffset = window.innerHeight * 0.60;
+                    const yOffsetPixels = panelHeightForOffset / 2;
+                    const projectedLocation = map.project(scenario.coords, targetZoom);
+                    const targetMapCenterProjected = L.point(projectedLocation.x, projectedLocation.y - yOffsetPixels);
+                    const targetLatLng = map.unproject(targetMapCenterProjected, targetZoom);
+                    map.flyTo(targetLatLng, targetZoom, { duration: 0.7 });
+                }
+            };
+            
+            if (panelWasHiddenOrCollapsed) {
+                infoPanel.addEventListener('transitionend', panelExpansionHandler);
+            } else {
+                const targetZoom = 11;
+                const panelHeightForOffset = window.innerHeight * 0.60;
+                const yOffsetPixels = panelHeightForOffset / 2;
+                const projectedLocation = map.project(scenario.coords, targetZoom);
+                const targetMapCenterProjected = L.point(projectedLocation.x, projectedLocation.y - yOffsetPixels);
+                const targetLatLng = map.unproject(targetMapCenterProjected, targetZoom);
+                map.flyTo(targetLatLng, targetZoom, { duration: 0.7 });
+            }
+        }
+        function setupMapInstance() {
+            if (!map) {
+                map = L.map('map', { zoomControl: false }).setView([16.0, 108.0], 5);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd', maxZoom: 19
+                }).addTo(map);
+                L.control.zoom({ position: 'topright' }).addTo(map);
+                mapMarkersLayerGroup = L.layerGroup().addTo(map);
+
+                map.on('click', () => {
+                    if (map && infoPanel.classList.contains('expanded')) {
+                        collapseInfoPanel();
+                    }
+                });
+            }
+        }
+        function loadStoryOnMap() {
+            setupMapInstance();
+            mapMarkersLayerGroup.clearLayers();
+            markers.length = 0;
+            latLngs.length = 0;
+            selectedMarker = null;
+
+            if (!activeStoryLessons || activeStoryLessons.length === 0) {
+                console.warn("No active learning scenarios for this story.");
+                map.setView([16.0, 108.0], 5);
+                currentLocationIndex = -1;
+                collapseInfoPanel(true);
+                updateNavigationControls();
+                panelTitleElement.textContent = "Scenario Details";
+                infoContent.innerHTML = `<p class="text-gray-600">No lessons in this story yet. Choose another story!</p>`;
+                return;
+            }
+
+            activeStoryLessons.forEach((scenario, index) => {
+                let zOffset = Z_INDEX_LOCKED;
+                if (scenario.status === 'current') zOffset = Z_INDEX_CURRENT;
+                else if (scenario.status === 'completed') zOffset = Z_INDEX_COMPLETED;
+
+                const marker = L.marker(scenario.coords, {
+                    icon: createLocationIcon(index + 1, false, scenario.status, scenario.performance),
+                    zIndexOffset: zOffset
+                })
+                .on('click', (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    displayLocationDetails(index);
+                });
+                markers.push(marker);
+                latLngs.push(scenario.coords);
+                mapMarkersLayerGroup.addLayer(marker);
+            });
+
+            if (latLngs.length > 0) {
+                const bounds = L.latLngBounds(latLngs);
+                map.fitBounds(bounds.pad(0.15));
+            }
+            
+            let initialIndexForStory = activeStoryLessons.findIndex(s => s.status === 'current');
+            if (initialIndexForStory === -1 && activeStoryLessons.length > 0) {
+                initialIndexForStory = 0;
+                if(activeStoryLessons[0].status === 'locked') {
+                    activeStoryLessons[0].status = 'current';
+                    markers[0].setIcon(createLocationIcon(1, false, 'current', null));
+                    markers[0].setZIndexOffset(Z_INDEX_CURRENT);
+                }
+            }
+            currentLocationIndex = initialIndexForStory !== -1 ? initialIndexForStory : -1;
+
+            collapseInfoPanel();
+            updateNavigationControls();
+        }
+        function collapseInfoPanel(hideFully = false) {
+            infoPanel.style.transform = '';
+            infoPanel.classList.remove('expanded');
+            if (hideFully) {
+                infoPanel.classList.remove('collapsed');
+                infoPanel.classList.add('hidden-fully');
+            } else {
+                infoPanel.classList.remove('hidden-fully');
+                infoPanel.classList.add('collapsed');
+                infoContentWrapper.style.display = 'none';
+                closePanelBtn.innerHTML = chevronUpSVG;
+            }
+
+            if (selectedMarker) {
+                const prevMarkerIndex = markers.indexOf(selectedMarker);
+                if (prevMarkerIndex !== -1 && activeStoryLessons[prevMarkerIndex]) {
+                    const prevScenario = activeStoryLessons[prevMarkerIndex];
+                    markers[prevMarkerIndex].setIcon(createLocationIcon(prevMarkerIndex + 1, false, prevScenario.status, prevScenario.performance));
+                }
+                selectedMarker = null;
+            }
+        }
+        function expandInfoPanel() {
+            infoPanel.style.transform = '';
+            if (infoPanel.classList.contains('collapsed') && currentLocationIndex !== -1) {
+                displayLocationDetails(currentLocationIndex);
+            } else if ((infoPanel.classList.contains('hidden-fully') || !infoPanel.classList.contains('expanded')) && currentLocationIndex === -1 && activeStoryLessons.length > 0) {
+                let initialIndexToOpen = activeStoryLessons.findIndex(s => s.status === 'current');
+                if (initialIndexToOpen === -1) initialIndexToOpen = 0;
+                if (initialIndexToOpen !== -1) displayLocationDetails(initialIndexToOpen);
+            } else if (infoPanel.classList.contains('hidden-fully')) {
+                infoPanel.classList.remove('hidden-fully','expanded');
+                infoPanel.classList.add('collapsed');
+                infoContentWrapper.style.display = 'none';
+                closePanelBtn.innerHTML = chevronUpSVG;
+            }
+        }
+        
+        // --- Page Navigation & UI Setup ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.page');
+        let mapPageFirstLoad = true;
+        const mapNavItem = document.querySelector('.nav-item[data-page="map-page-content"]');
+
+        function switchPage(pageId) {
+            pages.forEach(page => page.classList.remove('active-page'));
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active-page');
+            }
+            
+            navItems.forEach(item => {
+                item.classList.remove('active-nav-item');
+                if (item.dataset.page === pageId) item.classList.add('active-nav-item');
+            });
+
+            if (pageId === 'map-page-content') {
+                setupMapInstance();
+                setTimeout(() => {
+                    if (map) map.invalidateSize();
+                    if (mapPageFirstLoad || !activeStoryLessons || activeStoryLessons.length === 0) {
+                        loadStoryOnMap();
+                        mapPageFirstLoad = false;
+                    } else {
+                        if (infoPanel.classList.contains('expanded')) {
+                            closePanelBtn.innerHTML = chevronDownSVG;
+                        } else {
+                            collapseInfoPanel();
+                        }
+                    }
+                }, 0);
+                infoPanel.classList.remove('hidden-fully');
+            } else {
+                collapseInfoPanel(true);
+            }
+        }
+        
+        // --- Event Listeners ---
+        navItems.forEach(item => item.addEventListener('click', () => {
+            if (item.classList.contains('nav-item-disabled')) return;
+            switchPage(item.dataset.page);
+        }));
+        
+        document.getElementById('detail-panel-close-btn').addEventListener('click', hideStoryDetail);
+        storyDetailPanel.addEventListener('click', (e) => {
+            if (e.target === storyDetailPanel) {
+                hideStoryDetail();
+            }
+        });
+
+        closePanelBtn.addEventListener('click', (e) => {
+            L.DomEvent.stopPropagation(e);
+            if (infoPanel.classList.contains('expanded')) collapseInfoPanel();
+            else if (infoPanel.classList.contains('collapsed')) expandInfoPanel();
+        });
+
+        dragHandle.addEventListener('click', expandInfoPanel);
+        panelHeader.addEventListener('click', (e) => {
+            if (e.target === panelHeader || e.target === panelTitleElement) {
+                if (infoPanel.classList.contains('collapsed')) expandInfoPanel();
+            }
+        });
+
+        prevLocationBtn.addEventListener('click', () => {
+            if (currentLocationIndex > 0) displayLocationDetails(currentLocationIndex - 1);
+        });
+        nextLocationBtn.addEventListener('click', () => {
+            if (currentLocationIndex < activeStoryLessons.length - 1) displayLocationDetails(currentLocationIndex + 1);
+        });
+        
+        infoContent.addEventListener('click', (event) => {
+            if (event.target && event.target.id === 'start-lesson-action-button') {
+                const scenario = activeStoryLessons[currentLocationIndex];
+                if (scenario && scenario.status === 'current') {
+                    console.log(`Starting lesson: ${scenario.scenarioTitle}`);
+                    scenario.status = 'completed';
+                    scenario.performance = 'bronze';
+                    
+                    markers[currentLocationIndex].setIcon(createLocationIcon(currentLocationIndex + 1, true, scenario.status, scenario.performance));
+                    markers[currentLocationIndex].setZIndexOffset(Z_INDEX_COMPLETED);
+                    
+                    const statusIndicatorDiv = infoContent.querySelector('.status-indicator-container');
+                    if (statusIndicatorDiv) {
+                        statusIndicatorDiv.outerHTML = getStatusIndicatorHTML(scenario.status, scenario.performance);
+                    }
+                    const imgElement = infoContent.querySelector('img');
+                    if(imgElement) imgElement.classList.remove('grayscale');
+
+                    const nextScenarioIndex = currentLocationIndex + 1;
+                    if (nextScenarioIndex < activeStoryLessons.length && activeStoryLessons[nextScenarioIndex].status === 'locked') {
+                        activeStoryLessons[nextScenarioIndex].status = 'current';
+                        markers[nextScenarioIndex].setIcon(createLocationIcon(nextScenarioIndex + 1, false, 'current', null));
+                        markers[nextScenarioIndex].setZIndexOffset(Z_INDEX_CURRENT);
+                    }
+                    updateNavigationControls();
+                    
+                    if (nextScenarioIndex < activeStoryLessons.length) {
+                        setTimeout(() => displayLocationDetails(nextScenarioIndex), 300);
+                    } else {
+                        collapseInfoPanel();
+                    }
+                }
+            }
+        });
+
+        L.DomEvent.disableClickPropagation(infoPanel);
+        window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+
+        // --- Initial Application Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            switchPage('stories-page-content');
+            renderAllStories();
+            if (mapNavItem) mapNavItem.classList.add('nav-item-disabled');
+        });
+    </script>
+</body>
+</html>
